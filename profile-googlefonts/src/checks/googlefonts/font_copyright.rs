@@ -78,8 +78,6 @@ fn font_copyright(c: &TestableCollection, context: &Context) -> CheckFnResult {
         if let Some(md_copyright) = mdpb_copyrights.get(basename) {
             copyrights.push(("METADATA.pb", md_copyright.to_string()));
         }
-        println!("{}: {:?}", filename, copyrights);
-
         let mut copyright_sources: HashMap<String, Vec<&str>> = HashMap::new();
         for (source, string) in copyrights {
             let string = string.to_lowercase();
