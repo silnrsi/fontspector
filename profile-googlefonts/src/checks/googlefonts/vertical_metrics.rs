@@ -1,6 +1,5 @@
 use crate::network_conditions::is_listed_on_google_fonts;
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::TableProvider;
 
 #[check(
     id = "googlefonts/vertical_metrics",
@@ -41,37 +40,36 @@ fn vertical_metrics(t: &Testable, context: &Context) -> CheckFnResult {
         "cjk",
         "Not checking CJK fonts"
     );
-    let upm = f.font().head()?.units_per_em();
-    let os2_typo_ascender = f.font().os2()?.s_typo_ascender();
-    let os2_typo_descender = f.font().os2()?.s_typo_descender();
-    let os2_typo_linegap = f.font().os2()?.s_typo_line_gap();
-    let hhea_ascent = f.font().hhea()?.ascender().to_i16();
-    let hhea_descender = f.font().hhea()?.descender().to_i16();
-    let hhea_linegap = f.font().hhea()?.line_gap().to_i16();
-    // let os2_win_ascent = f.font().os2()?.us_win_ascent();
-    // let os2_win_descent = f.font().os2()?.us_win_descent();
+    let metrics = f.vertical_metrics()?;
 
-    if os2_typo_linegap != 0 {
+    if metrics.os2_typo_linegap != 0 {
         problems.push(Status::fail(
             "bad-OS/2.sTypoLineGap",
-            &format!("OS/2.sTypoLineGap is {}; it should be 0", os2_typo_linegap),
+            &format!(
+                "OS/2.sTypoLineGap is {}; it should be 0",
+                metrics.os2_typo_linegap
+            ),
         ));
     }
-    if hhea_linegap != 0 {
+    if metrics.hhea_linegap != 0 {
         problems.push(Status::fail(
             "bad-hhea.lineGap",
-            &format!("hhea.lineGap is {}; it should be 0", hhea_linegap),
+            &format!("hhea.lineGap is {}; it should be 0", metrics.hhea_linegap),
         ));
     }
 
-    let hhea_sum = (hhea_ascent + hhea_descender.abs() + hhea_linegap) as f32 / upm as f32;
+    // Convert them all to f32 when adding to avoid potential overflow
+    let hhea_sum = (metrics.hhea_ascent as f32
+        + metrics.hhea_descent.abs() as f32
+        + metrics.hhea_linegap as f32)
+        / metrics.upm as f32;
     if hhea_sum < 1.2 {
         problems.push(Status::fail(
             "bad-hhea-range",
             &format!(
                 "The sum of hhea.ascender + abs(hhea.descender) + hhea.lineGap is {} when it should be at least {}",
-                (hhea_sum * upm as f32) as i32,
-                (upm as f32 * 1.2) as i32
+                (hhea_sum * metrics.upm as f32) as i32,
+                (metrics.upm as f32 * 1.2) as i32
             ),
         ));
     } else if hhea_sum > 2.0 {
@@ -79,8 +77,8 @@ fn vertical_metrics(t: &Testable, context: &Context) -> CheckFnResult {
             "bad-hhea-range",
             &format!(
                 "The sum of hhea.ascender + abs(hhea.descender) + hhea.lineGap is {} when it should be at most {}",
-                (hhea_sum * upm as f32) as i32,
-                (upm as f32 * 2.0) as i32
+                (hhea_sum * metrics.upm as f32) as i32,
+                (metrics.upm as f32 * 2.0) as i32
             ),
         ));
     } else if hhea_sum > 1.5 {
@@ -89,44 +87,44 @@ fn vertical_metrics(t: &Testable, context: &Context) -> CheckFnResult {
             &format!(
                 "We recommend the absolute sum of the hhea metrics should be between 1.2-1.5x of the font's upm. This font has {}x ({})",
                 hhea_sum,
-                (hhea_sum * upm as f32) as i32
+                (hhea_sum * metrics.upm as f32) as i32
             ),
         ));
     }
 
-    if os2_typo_ascender < 0 {
+    if metrics.os2_typo_ascender < 0 {
         problems.push(Status::fail(
             "typo-ascender",
             &format!(
                 "OS/2.sTypoAscender is {}; it must be strictly positive",
-                os2_typo_ascender
+                metrics.os2_typo_ascender
             ),
         ));
     }
-    if hhea_ascent <= 0 {
+    if metrics.hhea_ascent <= 0 {
         problems.push(Status::fail(
             "hhea-ascent",
             &format!(
                 "hhea.ascent is {}; it must be strictly positive",
-                hhea_ascent
+                metrics.hhea_ascent
             ),
         ));
     }
-    if os2_typo_descender > 0 {
+    if metrics.os2_typo_descender > 0 {
         problems.push(Status::fail(
             "typo-descender",
             &format!(
                 "OS/2.sTypoDescender is {}; it must be negative or zero",
-                os2_typo_descender
+                metrics.os2_typo_descender
             ),
         ));
     }
-    if hhea_descender > 0 {
+    if metrics.hhea_descent > 0 {
         problems.push(Status::fail(
             "hhea-descent",
             &format!(
                 "hhea.descender is {}; it must be negative or zero",
-                hhea_descender
+                metrics.hhea_descent
             ),
         ));
     }

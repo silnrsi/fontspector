@@ -507,6 +507,21 @@ impl TestFont<'_> {
             StringId::SUBFAMILY_NAME,
         ])
     }
+
+    /// Returns the font's vertical metrics
+    pub fn vertical_metrics(&self) -> Result<VerticalMetrics, CheckError> {
+        Ok(VerticalMetrics {
+            upm: self.font().head()?.units_per_em(),
+            os2_typo_ascender: self.font().os2()?.s_typo_ascender(),
+            os2_typo_descender: self.font().os2()?.s_typo_descender(),
+            os2_typo_linegap: self.font().os2()?.s_typo_line_gap(),
+            hhea_ascent: self.font().hhea()?.ascender().to_i16(),
+            hhea_descent: self.font().hhea()?.descender().to_i16(),
+            hhea_linegap: self.font().hhea()?.line_gap().to_i16(),
+            os2_win_ascent: self.font().os2()?.us_win_ascent(),
+            os2_win_descent: self.font().os2()?.us_win_descent(),
+        })
+    }
 }
 
 /// Is a codepoint a CJK character?
@@ -518,3 +533,25 @@ fn is_cjk(cp: u32) -> bool {
 
 /// An empty [VariationSetting] for use in default location.
 pub const DEFAULT_LOCATION: &[VariationSetting] = &[];
+
+/// A font's vertical metrics
+pub struct VerticalMetrics {
+    /// The font's units per em
+    pub upm: u16,
+    /// The OS/2 Typographic Ascender
+    pub os2_typo_ascender: i16,
+    /// The OS/2 Typographic Descender
+    pub os2_typo_descender: i16,
+    /// The OS/2 Typographic Line Gap
+    pub os2_typo_linegap: i16,
+    /// The OS/2 Windows Ascender
+    pub os2_win_ascent: u16,
+    /// The OS/2 Windows Descender
+    pub os2_win_descent: u16,
+    /// The hhea Ascender
+    pub hhea_ascent: i16,
+    /// The hhea Descender
+    pub hhea_descent: i16,
+    /// The hhea Line Gap
+    pub hhea_linegap: i16,
+}

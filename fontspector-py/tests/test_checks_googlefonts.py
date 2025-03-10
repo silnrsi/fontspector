@@ -2930,87 +2930,81 @@ def test_check_vertical_metrics_regressions(check):
     )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/cjk_vertical_metrics")
-def test_check_cjk_vertical_metrics(check, requests_mock):
-    requests_mock.get(
-        "http://fonts.google.com/metadata/fonts",
-        json={
-            "familyMetadataList": [],
-        },
-    )
+def test_check_cjk_vertical_metrics(check):
 
     ttFont = TTFont(cjk_font)
-    assert_PASS(check(ttFont), "for Source Han Sans")
+    assert_PASS(check(ttFont, skip_network=True), "for Source Han Sans")
 
+    # This is going to be very slow as it saves a big CJK font many times.
     ttFont = TTFont(cjk_font)
     ttFont["OS/2"].fsSelection |= 1 << 7
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "bad-fselection-bit7",
         "for font where OS/2 fsSelection bit 7 is enabled",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].sTypoAscender = float("inf")
+    ttFont["OS/2"].sTypoAscender = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "bad-OS/2.sTypoAscender",
         "for font with bad OS/2.sTypoAscender",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].sTypoDescender = float("inf")
+    ttFont["OS/2"].sTypoDescender = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "bad-OS/2.sTypoDescender",
         "for font with bad OS/2.sTypoDescender",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].sTypoLineGap = float("inf")
+    ttFont["OS/2"].sTypoLineGap = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "bad-OS/2.sTypoLineGap",
         "for font where linegaps have been set (OS/2 table)",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["hhea"].lineGap = float("inf")
+    ttFont["hhea"].lineGap = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "bad-hhea.lineGap",
         "for font where linegaps have been set (hhea table)",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].usWinAscent = float("inf")
+    ttFont["OS/2"].usWinAscent = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "ascent-mismatch",
         "for a font where typo ascender != 0.88 * upm",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].usWinDescent = -float("inf")
+    ttFont["OS/2"].usWinDescent = 0
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         FAIL,
         "descent-mismatch",
         "for a font where typo descender != 0.12 * upm",
     )
 
     ttFont = TTFont(cjk_font)
-    ttFont["OS/2"].usWinAscent = float("inf")
-    ttFont["hhea"].ascent = float("inf")
+    ttFont["OS/2"].usWinAscent = 32767
+    ttFont["hhea"].ascent = 32767
     assert_results_contain(
-        check(ttFont),
+        check(ttFont, skip_network=True),
         WARN,
         "bad-hhea-range",
         "if font hhea and win metrics are greater than 1.5 * upm",
