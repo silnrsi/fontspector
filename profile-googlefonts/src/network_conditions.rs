@@ -36,6 +36,9 @@ pub(crate) fn production_metadata(context: &Context) -> Result<Map<String, Value
 #[allow(dead_code)]
 pub(crate) fn is_listed_on_google_fonts(family: &str, context: &Context) -> Result<bool, String> {
     // println!("Looking for family {}", family);
+    if context.skip_network {
+        return Err("Network access disabled".to_string());
+    }
     let key = format!("is_listed_on_google_fonts:{}", family);
     context.cached_question(
         &key,
@@ -71,6 +74,9 @@ pub(crate) fn remote_styles(family: &str, context: &Context) -> Result<Vec<Testa
 #[cfg(not(target_family = "wasm"))]
 fn remote_styles_impl(family: &str, context: &Context) -> Result<Vec<Testable>, String> {
     let key = format!("remote_styles:{}", family);
+    if context.skip_network {
+        return Err("Network access disabled".to_string());
+    }
     context.cached_question(
         &key,
         || {
