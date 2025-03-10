@@ -181,7 +181,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::vertical_metrics)
             //            .add_and_register_check(checks::googlefonts::vertical_metrics_regressions)
             //            .add_and_register_check(checks::googlefonts::cjk_vertical_metrics_regressions)
-            //            .add_and_register_check(checks::googlefonts::metadata::includes_production_subsets)
+            .add_and_register_check(checks::googlefonts::metadata::includes_production_subsets)
             .add_and_register_check(checks::googlefonts::weightclass)
             .with_configuration_defaults(
                 "file_size",

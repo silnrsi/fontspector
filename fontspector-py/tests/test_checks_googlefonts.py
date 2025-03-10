@@ -1178,31 +1178,18 @@ def test_check_metadata_subsets_order(check):
         )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/metadata/includes_production_subsets")
-def test_check_metadata_includes_production_subsets(check, requests_mock):
+def test_check_metadata_includes_production_subsets(check, tmp_path):
     """Check METADATA.pb has production subsets."""
 
-    requests_mock.get(
-        "http://fonts.google.com/metadata/fonts",
-        json={
-            "familyMetadataList": [
-                {
-                    "family": "Cabin",
-                    "subsets": ["menu", "latin", "latin-ext", "vietnamese"],
-                },
-            ],
-        },
-    )
+    mdpb = TEST_FILE("cabinvf/METADATA.pb")
+    assert_PASS(check(mdpb), "with a good METADATA.pb for this family...")
 
-    fonts = cabin_fonts
-    assert_PASS(check(fonts), "with a good METADATA.pb for this family...")
-
+    md = read_mdpb(mdpb)
     # Then we induce the problem by removing a subset:
-    md = Font(fonts[0]).family_metadata
     md.subsets.pop()
     assert_results_contain(
-        check(MockFont(file=fonts[0], family_metadata=md)),
+        check(fake_mdpb(tmp_path, md)),
         FAIL,
         "missing-subsets",
         "with a bad METADATA.pb (last subset has been removed)...",
