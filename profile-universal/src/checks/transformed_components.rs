@@ -138,6 +138,9 @@ pub(crate) fn decompose_components_impl(
     decompose_order: &[GlyphId],
 ) -> FixFnResult {
     let f = fixfont!(t);
+    if f.has_table(b"gvar") {
+        return Err("Cannot (yet) decompose nested components in variable fonts".to_string());
+    }
     let mut new_font = FontBuilder::new();
     let mut builder = GlyfLocaBuilder::new();
     let loca = f
