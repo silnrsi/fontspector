@@ -29,9 +29,10 @@ mod protos {
     #![allow(clippy::all, clippy::unwrap_used)]
     include!(concat!(env!("OUT_DIR"), "/protos/mod.rs"));
 }
+pub(crate) use designers::DesignerInfoProto;
 pub(crate) use fonts_public::FamilyProto;
 use fontspector_checkapi::{CheckError, Testable};
-use protos::fonts_public;
+use protos::{designers, fonts_public};
 
 pub(crate) fn family_proto(t: &Testable) -> Result<FamilyProto, CheckError> {
     let mdpb = std::str::from_utf8(&t.contents)
@@ -39,6 +40,7 @@ pub(crate) fn family_proto(t: &Testable) -> Result<FamilyProto, CheckError> {
     protobuf::text_format::parse_from_str::<FamilyProto>(mdpb)
         .map_err(|e| CheckError::Error(format!("Error parsing METADATA.pb: {}", e)))
 }
+
 mod valid_nameid25;
 pub use valid_nameid25::valid_nameid25;
 #[cfg(not(target_family = "wasm"))]
@@ -49,3 +51,5 @@ mod consistent_repo_urls;
 pub use consistent_repo_urls::consistent_repo_urls;
 mod primary_script;
 pub use primary_script::primary_script;
+mod designer_profiles;
+pub use designer_profiles::designer_profiles;

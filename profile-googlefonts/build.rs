@@ -3,6 +3,7 @@ fn main() {
         .pure()
         .includes(["src/protos"])
         .input("src/protos/fonts_public.proto")
+        .input("src/protos/designers.proto")
         .cargo_out_dir("protos")
         .run_from_script();
 }

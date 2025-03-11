@@ -180,3 +180,49 @@ pub(crate) fn get_url(
     }
     request.send().and_then(|r| r.error_for_status())
 }
+
+pub const DESIGNER_INFO_RAW_URL: &str =
+    "https://raw.githubusercontent.com/google/fonts/master/catalog/designers/";
+
+#[cfg(not(target_family = "wasm"))]
+pub(crate) fn is_designer_listed(
+    context: &Context,
+    designer: &str,
+) -> Result<Option<String>, String> {
+    let key = format!("is_designer_listed:{}", designer);
+    let get_func = || {
+        // We don't use get_url here because we don't want error_for_status
+        let url = format!("{}/{}/info.pb", DESIGNER_INFO_RAW_URL, designer);
+        let mut request = reqwest::blocking::Client::new().get(&url);
+        if let Some(timeout) = context.network_timeout {
+            request = request.timeout(std::time::Duration::new(timeout, 0));
+        }
+        let response = request.send();
+        match response {
+            Ok(r) => {
+                if r.status() == reqwest::StatusCode::OK {
+                    Some(r.text().map_err(|e| e.to_string())).transpose()
+                } else if r.status() == reqwest::StatusCode::NOT_FOUND {
+                    Ok(None)
+                } else {
+                    Err(format!("Unexpected status code: {}", r.status()))
+                }
+            }
+            Err(e) => Err(format!("Failed to fetch designer info: {}", e)),
+        }
+    };
+    context.cached_question(
+        &key,
+        get_func,
+        |r: Option<String>| Value::String(r.unwrap_or_default()),
+        |v| {
+            v.as_str().map_or(Ok(None), |s| {
+                Ok(if s.is_empty() {
+                    None
+                } else {
+                    Some(s.to_string())
+                })
+            })
+        },
+    )
+}

@@ -3302,7 +3302,7 @@ def test_check_metadata_escaped_strings(check):
     assert_results_contain(check(bad), FAIL, "escaped-strings")
 
 
-@pytest.mark.skip("Check not ported yet.")
+@pytest.mark.skip("This check is ported, but we can't mock the requests.")
 @check_id("googlefonts/metadata/designer_profiles")
 def test_check_metadata_designer_profiles(check, requests_mock):
     """METADATA.pb: Designer is listed with the correct name on
@@ -3328,7 +3328,7 @@ def test_check_metadata_designer_profiles(check, requests_mock):
     requests_mock.get(
         "https://raw.githubusercontent.com/google/fonts/master/"
         "catalog/designers/sorkintype/sorkin_type.png",
-        content=b"\x89PNG\x0D\x0A\x1A\x0A",
+        content=b"\x89PNG\x0d\x0a\x1a\x0a",
     )
 
     # Delve Withrington is still not listed on the designers catalog.

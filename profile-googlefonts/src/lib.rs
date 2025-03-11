@@ -58,7 +58,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             //            checks::googlefonts::metadata::valid_filename_values // redundant, see fontbakery#4997
             //            checks::googlefonts::metadata::undeclared_fonts // redundant, see fontbakery#4997
             //            checks::googlefonts::metadata::nameid/font_name // redundant, see fontbakery#4581
-            //            .add_and_register_check(checks::googlefonts::metadata::designer_profiles)
+            .add_and_register_check(checks::googlefonts::metadata::designer_profiles)
             .add_and_register_check(checks::googlefonts::metadata::escaped_strings)
             //            .add_and_register_check(checks::googlefonts::metadata::family_directory_name)
             .add_and_register_check(checks::googlefonts::metadata::familyname)
