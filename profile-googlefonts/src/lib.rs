@@ -48,17 +48,21 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::metadata::category)
             //            checks::googlefonts::metadata::category_hints // merged into metadata/validate
             .add_and_register_check(checks::googlefonts::metadata::consistent_repo_urls)
-            .add_and_register_check(checks::googlefonts::metadata::consistent_with_fonts)
-            //            checks::googlefonts::metadata::filenames // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::canonical_style_names // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::valid_full_name_values // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::nameid/post_script_name // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::valid_post_script_name_values // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::nameid/family_and_full_names // merged into metadata/consistent_with_fonts
-            //            checks::googlefonts::metadata::valid_filename_values // redundant, see fontbakery#4997
-            //            checks::googlefonts::metadata::undeclared_fonts // redundant, see fontbakery#4997
-            //            checks::googlefonts::metadata::nameid/font_name // redundant, see fontbakery#4581
-            .add_and_register_check(checks::googlefonts::metadata::designer_profiles)
+            .add_and_register_check(checks::googlefonts::metadata::consistent_with_fonts);
+        //            checks::googlefonts::metadata::filenames // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::canonical_style_names // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::valid_full_name_values // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::nameid/post_script_name // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::valid_post_script_name_values // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::nameid/family_and_full_names // merged into metadata/consistent_with_fonts
+        //            checks::googlefonts::metadata::valid_filename_values // redundant, see fontbakery#4997
+        //            checks::googlefonts::metadata::undeclared_fonts // redundant, see fontbakery#4997
+        //            checks::googlefonts::metadata::nameid/font_name // redundant, see fontbakery#4581
+        #[cfg(not(target_family = "wasm"))]
+        let builder =
+            builder.add_and_register_check(checks::googlefonts::metadata::designer_profiles);
+
+        let builder = builder
             .add_and_register_check(checks::googlefonts::metadata::escaped_strings)
             //            .add_and_register_check(checks::googlefonts::metadata::family_directory_name)
             .add_and_register_check(checks::googlefonts::metadata::familyname)

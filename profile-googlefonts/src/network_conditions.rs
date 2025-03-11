@@ -181,6 +181,7 @@ pub(crate) fn get_url(
     request.send().and_then(|r| r.error_for_status())
 }
 
+#[allow(dead_code)]
 pub const DESIGNER_INFO_RAW_URL: &str =
     "https://raw.githubusercontent.com/google/fonts/master/catalog/designers/";
 

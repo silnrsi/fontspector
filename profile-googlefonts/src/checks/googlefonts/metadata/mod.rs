@@ -29,6 +29,7 @@ mod protos {
     #![allow(clippy::all, clippy::unwrap_used)]
     include!(concat!(env!("OUT_DIR"), "/protos/mod.rs"));
 }
+#[allow(unused_imports)]
 pub(crate) use designers::DesignerInfoProto;
 pub(crate) use fonts_public::FamilyProto;
 use fontspector_checkapi::{CheckError, Testable};
@@ -51,5 +52,7 @@ mod consistent_repo_urls;
 pub use consistent_repo_urls::consistent_repo_urls;
 mod primary_script;
 pub use primary_script::primary_script;
+#[cfg(not(target_family = "wasm"))]
 mod designer_profiles;
+#[cfg(not(target_family = "wasm"))]
 pub use designer_profiles::designer_profiles;

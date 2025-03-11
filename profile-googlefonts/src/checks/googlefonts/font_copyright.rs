@@ -2,8 +2,7 @@ use fontspector_checkapi::{prelude::*, FileTypeConvert};
 use hashbrown::HashMap;
 use skrifa::string::StringId;
 
-use crate::checks::googlefonts::metadata::family_proto;
-use crate::constants::EXPECTED_COPYRIGHT_PATTERN;
+use crate::{checks::googlefonts::metadata::family_proto, constants::EXPECTED_COPYRIGHT_PATTERN};
 
 #[check(
     id = "googlefonts/font_copyright",
@@ -71,7 +70,7 @@ fn font_copyright(c: &TestableCollection, context: &Context) -> CheckFnResult {
             .file_name()
             .and_then(|x| x.to_str())
             .unwrap_or_default();
-        let filename = font.filename.as_os_str().to_str().unwrap_or_default();
+        // let filename = font.filename.as_os_str().to_str().unwrap_or_default();
         let mut copyrights = vec![];
         font.get_name_entry_strings(StringId::COPYRIGHT_NOTICE)
             .for_each(|x| copyrights.push(("Name Table entry", x)));
