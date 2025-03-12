@@ -102,7 +102,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::description::valid_html)
             .add_section("Family Checks")
             .add_and_register_check(checks::googlefonts::family::equal_codepoint_coverage)
-            //            .add_and_register_check(checks::googlefonts::family::italics_have_roman_counterparts)
+            .add_and_register_check(checks::googlefonts::family::italics_have_roman_counterparts)
             //            .add_and_register_check(checks::googlefonts::family::tnum_horizontal_metrics)
             .add_section("Name table checks")
             .add_and_register_check(checks::googlefonts::name::family_name_compliance)

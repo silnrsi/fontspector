@@ -2396,30 +2396,24 @@ def test_check_fvar_instances__whats_going_on_here(check):  # TODO: REVIEW THIS.
     assert_PASS(check(ttFont), "with a good font...")
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/family/italics_have_roman_counterparts")
 def test_check_family_italics_have_roman_counterparts(check):
     """Ensure Italic styles have Roman counterparts."""
 
-    # The path used here, "some-crazy.path/", is meant to ensure
-    # that the parsing code does not get lost when trying to
-    # extract the style of a font file.
     fonts = [
-        "some-crazy.path/merriweather/Merriweather-BlackItalic.ttf",
-        "some-crazy.path/merriweather/Merriweather-Black.ttf",
-        "some-crazy.path/merriweather/Merriweather-BoldItalic.ttf",
-        "some-crazy.path/merriweather/Merriweather-Bold.ttf",
-        "some-crazy.path/merriweather/Merriweather-Italic.ttf",
-        "some-crazy.path/merriweather/Merriweather-LightItalic.ttf",
-        "some-crazy.path/merriweather/Merriweather-Light.ttf",
-        "some-crazy.path/merriweather/Merriweather-Regular.ttf",
+        TEST_FILE("merriweather/Merriweather-BlackItalic.ttf"),
+        TEST_FILE("merriweather/Merriweather-Black.ttf"),
+        TEST_FILE("merriweather/Merriweather-BoldItalic.ttf"),
+        TEST_FILE("merriweather/Merriweather-Bold.ttf"),
+        TEST_FILE("merriweather/Merriweather-Italic.ttf"),
+        TEST_FILE("merriweather/Merriweather-LightItalic.ttf"),
+        TEST_FILE("merriweather/Merriweather-Light.ttf"),
+        TEST_FILE("merriweather/Merriweather-Regular.ttf"),
     ]
 
-    assert_PASS(check([MockFont(file=font) for font in fonts]), "with a good family...")
+    assert_PASS(check(fonts), "with a good family...")
 
     fonts.pop(-1)  # remove the last one, which is the Regular
-    assert "some-crazy.path/merriweather/Merriweather-Regular.ttf" not in fonts
-    assert "some-crazy.path/merriweather/Merriweather-Italic.ttf" in fonts
     assert_results_contain(
         check(fonts),
         FAIL,
@@ -2427,22 +2421,27 @@ def test_check_family_italics_have_roman_counterparts(check):
         "with a family that has an Italic but lacks a Regular.",
     )
 
-    fonts.append("some-crazy.path/merriweather/MerriweatherItalic.ttf")
+    shutil.copy(
+        TEST_FILE("merriweather/Merriweather-Italic.ttf"),
+        TEST_FILE("merriweather/MerriweatherItalic.ttf"),
+    )
+    fonts.append(TEST_FILE("merriweather/MerriweatherItalic.ttf"))
     assert_results_contain(
         check(fonts),
         WARN,
         "bad-filename",
         "with a family that has a non-canonical italic filename.",
     )
+    os.unlink(TEST_FILE("merriweather/MerriweatherItalic.ttf"))
 
     # This check must also be able to deal with variable fonts!
     fonts = [
-        "cabinvfbeta/CabinVFBeta-Italic[wdth,wght].ttf",
-        "cabinvfbeta/CabinVFBeta[wdth,wght].ttf",
+        TEST_FILE("cabinvf/Cabin-Italic[wdth,wght].ttf"),
+        TEST_FILE("cabinvf/Cabin[wdth,wght].ttf"),
     ]
     assert_PASS(check(fonts), "with a good set of varfonts...")
 
-    fonts = ["cabinvfbeta/CabinVFBeta-Italic[wdth,wght].ttf"]
+    fonts = [TEST_FILE("cabinvf/Cabin-Italic[wdth,wght].ttf")]
     assert_results_contain(
         check(fonts),
         FAIL,
