@@ -93,7 +93,6 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
 
         let builder = builder
             .add_and_register_check(checks::googlefonts::description::eof_linebreak)
-            //            .add_and_register_check(checks::googlefonts::description::family_update)
             .add_and_register_check(checks::googlefonts::description::git_url)
             .add_and_register_check(checks::googlefonts::description::has_article)
             .add_and_register_check(checks::googlefonts::description::has_unsupported_elements)
@@ -103,7 +102,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_section("Family Checks")
             .add_and_register_check(checks::googlefonts::family::equal_codepoint_coverage)
             .add_and_register_check(checks::googlefonts::family::italics_have_roman_counterparts)
-            //            .add_and_register_check(checks::googlefonts::family::tnum_horizontal_metrics)
+            .add_and_register_check(checks::googlefonts::family::tnum_horizontal_metrics)
             .add_section("Name table checks")
             .add_and_register_check(checks::googlefonts::name::family_name_compliance)
             .add_and_register_check(checks::googlefonts::name::line_breaks)
@@ -120,11 +119,11 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::name::rfn)
             .add_section("Repository Checks")
             //            .add_and_register_check(checks::googlefonts::repo::dirname_matches_nameid_1)
-            //            .add_and_register_check(checks::googlefonts::repo::fb_report)
-            //            .add_and_register_check(checks::googlefonts::repo::sample_image)
-            //            checks::googlefonts::repo::upstream_yaml_has_required_fields // Redundant, no upstream.yaml any more
             //            .add_and_register_check(checks::googlefonts::repo::vf_has_static_fonts)
-            //            .add_and_register_check(checks::googlefonts::repo::zip_files",
+            //            checks::googlefonts::repo::fb_report // Upstream repos should be checked separately
+            //            checks::googlefonts::repo::sample_image // Upstream repos should be checked separately
+            //            checks::googlefonts::repo::upstream_yaml_has_required_fields // Redundant, no upstream.yaml any more
+            //            checks::googlefonts::repo::zip_files // Upstream repos should be checked separately
             .add_section("Shaping Checks")
             .add_and_register_check(checks::dotted_circle);
         #[cfg(not(target_family = "wasm"))]
@@ -168,6 +167,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::old_ttfautohint)
             // checks::googlefonts::production_encoded_glyphs // DISABLED
             // checks::googlefonts::production_glyphs_similarity // Unlikely to be useful in the short term
+            // checks::googlefonts::description::family_update // Unlikely to useful yet
             .add_and_register_check(checks::googlefonts::render_own_name)
             .add_and_register_check(checks::googlefonts::STAT::axis_order)
             .add_and_register_check(checks::googlefonts::STAT::axisregistry)
