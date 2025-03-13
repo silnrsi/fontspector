@@ -64,7 +64,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
 
         let builder = builder
             .add_and_register_check(checks::googlefonts::metadata::escaped_strings)
-            //            .add_and_register_check(checks::googlefonts::metadata::family_directory_name)
+            .add_and_register_check(checks::googlefonts::metadata::family_directory_name)
             .add_and_register_check(checks::googlefonts::metadata::familyname)
             .add_and_register_check(checks::googlefonts::metadata::has_regular)
             //            checks::googlefonts::metadata::match_filename_postscript // Merged into metadata/validate

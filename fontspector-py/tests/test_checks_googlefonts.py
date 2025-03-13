@@ -3406,20 +3406,17 @@ def test_check_meta_script_lang_tags(check):
     assert_results_contain(check(ttFont), WARN, "lacks-meta-table")
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/metadata/family_directory_name")
-def test_check_metadata_family_directory_name(check):
+def test_check_metadata_family_directory_name(check, tmp_path):
     """Check family directory name."""
 
-    font = TEST_FILE("overpassmono/OverpassMono-Regular.ttf")
-    assert_PASS(check(font))
-    old_md = Font(font).family_metadata
+    mdpb = TEST_FILE("overpassmono/METADATA.pb")
+    assert_PASS(check(mdpb))
 
-    # Note:
-    # Here I explicitly pass 'family_metadata' to avoid it being recomputed
-    # after I make the family_directory wrong:
+    # Copy it to a temp directory where it won't have the correct parent name
+    shutil.copy(mdpb, tmp_path / "METADATA.pb")
     assert_results_contain(
-        check(MockFont(file=font, family_metadata=old_md, family_directory="overpass")),
+        check(str(tmp_path / "METADATA.pb")),
         FAIL,
         "bad-directory-name",
     )
