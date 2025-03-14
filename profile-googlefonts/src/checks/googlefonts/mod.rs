@@ -54,3 +54,4 @@ mod vertical_metrics;
 pub use vertical_metrics::vertical_metrics;
 mod cjk_vertical_metrics;
 pub use cjk_vertical_metrics::cjk_vertical_metrics;
+pub mod glyphsets;

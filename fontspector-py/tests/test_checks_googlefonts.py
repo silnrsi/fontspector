@@ -3796,15 +3796,9 @@ def test_check_metadata_unreachable_subsetting(check):
     )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/glyphsets/shape_languages")
 def test_check_shape_languages(check):
     """Shapes languages in all GF glyphsets."""
-
-    #    FIXME: With the latest version of shaperglot (v0.6.3), our reference
-    #    Cabin-Regular.ttf is not fully passing anymore:
-    #    test_font = TTFont(TEST_FILE("cabin/Cabin-Regular.ttf"))
-    #    assert_PASS(check(test_font))
 
     test_font = TTFont(TEST_FILE("BadGrades/BadGrades-VF.ttf"))
     assert_results_contain(check(test_font), FAIL, "no-glyphset-supported")
