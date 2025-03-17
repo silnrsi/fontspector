@@ -13,6 +13,10 @@ pub(crate) const LICENSE: FileType = FileType {
     pattern: "{LICENSE,OFL}.txt",
 };
 
+pub(crate) const IMAGE: FileType = FileType {
+    pattern: "*.{png,jpg,jpeg,jxl,gif,svg}",
+};
+
 pub struct GoogleFonts;
 impl fontspector_checkapi::Plugin for GoogleFonts {
     fn register(&self, cr: &mut Registry) -> Result<(), String> {
@@ -20,6 +24,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
         let desc = FileType::new("*.en_us.html");
         cr.register_filetype("MDPB", mdpb);
         cr.register_filetype("DESC", desc);
+        cr.register_filetype("IMAGE", IMAGE);
         cr.register_filetype("LICENSE", LICENSE);
 
         let builder = ProfileBuilder::new()
@@ -32,7 +37,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             //            checks::typographic_family_name
             //            checks::vtt_volt_data
             .add_section("Article Checks")
-            //            .add_and_register_check(checks::googlefonts::article::images)
+            .add_and_register_check(checks::googlefonts::article::images)
             .add_section("Metadata Checks")
             .add_and_register_check(checks::googlefonts::metadata::axes);
         //            checks::googlefonts::metadata::axisregistry_bounds // Merged into metadata/axes

@@ -45,6 +45,7 @@ scraper = { version = "0.22.0", default-features = false, features = [
     "errors",
 ] }
 semver = "1.0.25"
+image = "0.25.5"
 
 [build-dependencies]
 protobuf-codegen = "3.7.1"
