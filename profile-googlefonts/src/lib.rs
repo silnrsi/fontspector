@@ -81,7 +81,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::metadata::unreachable_subsetting)
             .add_and_register_check(checks::googlefonts::metadata::validate)
             .add_and_register_check(checks::googlefonts::metadata::valid_nameid25)
-            //            .add_and_register_check(checks::googlefonts::metadata::weightclass)
+            .add_and_register_check(checks::googlefonts::metadata::weightclass)
             .add_section("Glyphset Checks")
             .add_and_register_check(checks::googlefonts::glyphsets::shape_languages)
             .add_and_register_check(checks::googlefonts::tofu)

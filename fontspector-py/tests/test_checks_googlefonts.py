@@ -1801,45 +1801,53 @@ def test_check_check_metadata_canonical_weight_value(check, tmp_path):
         )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/metadata/weightclass")
-def test_check_metadata_weightclass(check):
+def test_check_metadata_weightclass(check, tmp_path):
     """Checking OS/2 usWeightClass matches weight specified at METADATA.pb"""
 
     # === test cases for Variable Fonts ===
     # Our reference Jura is known to be good
     font = TEST_FILE("varfont/jura/Jura[wght].ttf")
-    assert_PASS(check(font), "with a good metadata...")
+    mdpb = TEST_FILE("varfont/jura/METADATA.pb")
+    assert_PASS(check([font, mdpb]), "with a good metadata...")
 
     # Should report if a bad weight value is ifound though:
-    md = Font(font).font_metadata
-    good_value = md.weight
+    md = Font(font).family_metadata
+    good_value = md.fonts[0].weight
     bad_value = good_value + 100
-    md.weight = bad_value
+    md.fonts[0].weight = bad_value
+
     assert_results_contain(
-        check(MockFont(file=font, font_metadata=md)),
+        check([font, fake_mdpb(tmp_path, md)]),
         FAIL,
         "mismatch",
         "with a bad metadata...",
     )
 
     font = TEST_FILE("leaguegothic-vf/LeagueGothic[wdth].ttf")
-    assert_PASS(check(font), 'with a good VF that lacks a "wght" axis....')
+    mdpb = TEST_FILE("leaguegothic-vf/METADATA.pb")
+    assert_PASS(check([font, mdpb]), 'with a good VF that lacks a "wght" axis....')
     # See: https://github.com/fonttools/fontbakery/issues/3529
 
     # === test cases for Static Fonts ===
     # Our reference Montserrat family is a good 18-styles family:
     for fontfile in MONTSERRAT_RIBBI + MONTSERRAT_NON_RIBBI:
         ttFont = TTFont(fontfile)
-        assert_PASS(check(ttFont), f"with a good font ({fontfile})...")
+        mdpb = TEST_FILE("montserrat/METADATA.pb")
+        assert_PASS(check([ttFont, mdpb]), f"with a good font ({fontfile})...")
 
         # but should report bad weight values:
-        md = Font(font).font_metadata
-        good_value = md.weight
-        bad_value = good_value + 50
-        md.weight = bad_value
+        md = Font(fontfile).family_metadata
+        changed = False
+        for font in md.fonts:
+            if font.filename == os.path.basename(fontfile):
+                good_value = font.weight
+                bad_value = good_value + 50
+                font.weight = bad_value
+                changed = True
+        assert changed, fontfile
         assert_results_contain(
-            check(MockFont(file=font, font_metadata=md)),
+            check([fontfile, fake_mdpb(tmp_path, md)]),
             FAIL,
             "mismatch",
             f"with bad metadata for {fontfile}...",
@@ -1849,17 +1857,25 @@ def test_check_metadata_weightclass(check):
         # accept both 100, 250 for Thin and 200, 275 for ExtraLight
         if "Thin" in fontfile:
             ttFont["OS/2"].usWeightClass = 100
-            assert_PASS(check(ttFont), f"with weightclass 100 on ({fontfile})...")
+            assert_PASS(
+                check([ttFont, mdpb]), f"with weightclass 100 on ({fontfile})..."
+            )
 
             ttFont["OS/2"].usWeightClass = 250
-            assert_PASS(check(ttFont), f"with weightclass 250 on ({fontfile})...")
+            assert_PASS(
+                check([ttFont, mdpb]), f"with weightclass 250 on ({fontfile})..."
+            )
 
         if "ExtraLight" in fontfile:
             ttFont["OS/2"].usWeightClass = 200
-            assert_PASS(check(ttFont), f"with weightClass 200 on ({fontfile})...")
+            assert_PASS(
+                check([ttFont, mdpb]), f"with weightClass 200 on ({fontfile})..."
+            )
 
             ttFont["OS/2"].usWeightClass = 275
-            assert_PASS(check(ttFont), f"with weightClass 275 on ({fontfile})...")
+            assert_PASS(
+                check([ttFont, mdpb]), f"with weightClass 275 on ({fontfile})..."
+            )
 
 
 @check_id("googlefonts/metadata/consistent_repo_urls")

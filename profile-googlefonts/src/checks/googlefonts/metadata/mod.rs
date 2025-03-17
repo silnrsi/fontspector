@@ -62,3 +62,5 @@ mod family_directory_name;
 pub use family_directory_name::family_directory_name;
 mod unreachable_subsetting;
 pub use unreachable_subsetting::unreachable_subsetting;
+mod weightclass;
+pub use weightclass::weightclass;
