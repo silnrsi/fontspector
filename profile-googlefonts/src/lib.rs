@@ -78,7 +78,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::metadata::regular_is_400)
             .add_and_register_check(checks::googlefonts::metadata::subsets_correct) // Replacement for metadata/unsupported_subsets
             //            checks::googlefonts::metadata::single_cjk_subset // Merged into metadata/subsets_correct
-            //            .add_and_register_check(checks::googlefonts::metadata::unreachable_subsetting)
+            .add_and_register_check(checks::googlefonts::metadata::unreachable_subsetting)
             .add_and_register_check(checks::googlefonts::metadata::validate)
             .add_and_register_check(checks::googlefonts::metadata::valid_nameid25)
             //            .add_and_register_check(checks::googlefonts::metadata::weightclass)

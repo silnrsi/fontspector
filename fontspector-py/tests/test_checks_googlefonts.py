@@ -3774,7 +3774,6 @@ def test_check_description_has_unsupported_elements(check):
     assert_results_contain(results, ERROR, "video-tag-needs-src", "with a bad font")
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/metadata/unreachable_subsetting")
 def test_check_metadata_unreachable_subsetting(check):
     """Check for codepoints not covered by METADATA subsetting"""

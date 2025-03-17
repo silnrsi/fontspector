@@ -16,7 +16,7 @@ fontspector-checkapi = { path = "../fontspector-checkapi", features = [
 ] }
 google-fonts-axisregistry = { git = "https://github.com/googlefonts/axisregistry" }
 google-fonts-languages = "0"
-google-fonts-subsets = "0"
+google-fonts-subsets = { git = "https://github.com/googlefonts/nam-files" }
 google-fonts-glyphsets = { git = "https://github.com/googlefonts/glyphsets" }
 shaperglot = "1"
 indexmap = { workspace = true }
@@ -37,6 +37,7 @@ unicode-properties = { workspace = true }
 unicode-canonical-combining-class = "1.0.0"
 unicode-script = "0.5.7"
 yeslogic-unicode-blocks = "0.2.0"
+unicode_names2 = { workspace = true }
 write-fonts = { workspace = true }
 hashbrown = "0.15.2"
 
