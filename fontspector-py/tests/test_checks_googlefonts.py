@@ -3782,8 +3782,9 @@ def test_check_metadata_unreachable_subsetting(check):
     assert_PASS(check(font), "with a good font")
 
     font = TEST_FILE("cabin/Cabin-Regular.ttf")
+    mdpb = TEST_FILE("cabin/METADATA.pb")
     assert_results_contain(
-        check(font), WARN, "unreachable-subsetting", "with a bad font"
+        check([font, mdpb]), WARN, "unreachable-subsetting", "with a bad font"
     )
 
     font = TEST_FILE("playfair/Playfair-Italic[opsz,wdth,wght].ttf")
