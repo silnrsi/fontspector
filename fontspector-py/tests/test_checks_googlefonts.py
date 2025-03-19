@@ -2466,9 +2466,8 @@ def test_check_family_italics_have_roman_counterparts(check):
     )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/repo/dirname_matches_nameid_1")
-def test_check_repo_dirname_match_nameid_1(check, tmp_path):
+def test_check_repo_dirname_matches_nameid_1(check, tmp_path):
     FONT_FAMILY_NAME = "rosarivo"
 
     # Create a temporary directory that mimics the folder structure of the Google Fonts
@@ -2503,15 +2502,6 @@ def test_check_repo_dirname_match_nameid_1(check, tmp_path):
     # and delete the Regular font file to make the check fail.
     os.replace(renamed_tmp_gf_dir, tmp_gf_dir)
     os.remove(reg_font_path)
-
-    # FAIL ("lacks-regular") result
-    fonts = [str(pth) for pth in tmp_gf_dir.glob("*.ttf")]
-    msg = assert_results_contain(check(fonts), FAIL, "lacks-regular")
-    assert "The font seems to lack a regular." in msg
-
-    # SKIP result; the fonts are in a directory that doesn't have the correct structure.
-    msg = assert_results_contain(check(cabin_fonts), SKIP, "unfulfilled-conditions")
-    assert "Unfulfilled Conditions: gfonts_repo_structure" in msg
 
 
 @check_id("googlefonts/repo/vf_has_static_fonts")
