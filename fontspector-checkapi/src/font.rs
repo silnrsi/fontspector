@@ -522,6 +522,15 @@ impl TestFont<'_> {
             os2_win_descent: self.font().os2()?.us_win_descent(),
         })
     }
+
+    /// True if the font's OS/2.fsSelection bit 7 (USE_TYPO_METRICS) is set
+    pub fn use_typo_metrics(&self) -> Result<bool, CheckError> {
+        Ok(self
+            .font()
+            .os2()?
+            .fs_selection()
+            .intersects(SelectionFlags::USE_TYPO_METRICS))
+    }
 }
 
 /// Is a codepoint a CJK character?

@@ -55,3 +55,5 @@ pub use vendor_id::vendor_id;
 pub use version_bump::version_bump;
 pub use vertical_metrics::vertical_metrics;
 pub use weightclass::weightclass;
+mod vertical_metrics_regressions;
+pub use vertical_metrics_regressions::vertical_metrics_regressions;

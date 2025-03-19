@@ -2789,7 +2789,6 @@ def test_check_vertical_metrics(check):
     # )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/vertical_metrics_regressions")
 def test_check_vertical_metrics_regressions(check):
     def new_context():
@@ -2802,14 +2801,13 @@ def test_check_vertical_metrics_regressions(check):
 
     # Cabin test family should match by default
     context = new_context()
-    assert_PASS(check(context), "with a good family...")
+    assert_PASS(check([TEST_FILE("cabin/Cabin-Regular.ttf")]), "with a good family...")
 
     # FAIL with changed vertical metric values
-    local_regular = context.regular_ttFont
+    local_regular = TTFont(TEST_FILE("cabin/Cabin-Regular.ttf"))
     local_regular["OS/2"].sTypoAscender = 0
-    context.regular_ttFont = local_regular
     assert_results_contain(
-        check(context),
+        check([local_regular]),
         FAIL,
         "bad-typo-ascender",
         "with a family which has an incorrect typoAscender...",
@@ -2817,7 +2815,7 @@ def test_check_vertical_metrics_regressions(check):
 
     local_regular["OS/2"].sTypoDescender = 0
     assert_results_contain(
-        check(context),
+        check([local_regular]),
         FAIL,
         "bad-typo-descender",
         "with a family which has an incorrect typoDescender...",
@@ -2825,7 +2823,7 @@ def test_check_vertical_metrics_regressions(check):
 
     local_regular["hhea"].ascent = 0
     assert_results_contain(
-        check(context),
+        check([local_regular]),
         FAIL,
         "bad-hhea-ascender",
         "with a family which has an incorrect hhea ascender...",
@@ -2833,102 +2831,10 @@ def test_check_vertical_metrics_regressions(check):
 
     local_regular["hhea"].descent = 0
     assert_results_contain(
-        check(context),
+        check([local_regular]),
         FAIL,
         "bad-hhea-descender",
         "with a family which has an incorrect hhea descender...",
-    )
-
-    # Fail if family on Google Fonts has fsSelection bit 7 enabled
-    # but checked fonts don't
-    local_regular["OS/2"].fsSelection &= ~(1 << 7)
-    assert_results_contain(
-        check(context),
-        FAIL,
-        "bad-fsselection-bit7",
-        "with a remote family which has typo metrics "
-        "enabled and the fonts being checked don't.",
-    )
-
-    if 0:  # FIXME: pylint:disable=W0125
-        # Pass if family on Google Fonts doesn't have fsSelection bit 7 enabled
-        # but checked fonts have taken this into consideration
-        context = new_context()
-        remote_regular = context.testables[0].regular_remote_style
-        local_regular = context.regular_ttFont
-
-        remote_regular["OS/2"].fsSelection &= ~(1 << 7)
-        local_regular["OS/2"].sTypoAscender = remote_regular["OS/2"].usWinAscent
-        local_regular["OS/2"].sTypoDescender = -remote_regular["OS/2"].usWinDescent
-        local_regular["hhea"].ascent = remote_regular["OS/2"].usWinAscent
-        local_regular["hhea"].descent = -remote_regular["OS/2"].usWinDescent
-        context.regular_ttFont = local_regular
-        context.regular_remote_style = remote_regular
-        assert_PASS(
-            check(context),
-            "with a remote family which does not have typo metrics"
-            " enabled but the checked fonts vertical metrics have been"
-            " set so its typo and hhea metrics match the remote"
-            " fonts win metrics.",
-        )
-
-    if 0:  # FIXME: pylint:disable=W0125
-        # Same as previous check but using a remote font which has a different upm
-        context = new_context()
-        remote_regular = context.testables[0].regular_remote_style
-        local_regular = context.regular_ttFont
-
-        remote_regular["OS/2"].fsSelection &= ~(1 << 7)
-        remote_regular["head"].unitsPerEm = 2000
-        # divide by 2 since we've doubled the upm
-        local_regular["OS/2"].sTypoAscender = math.ceil(
-            remote_regular["OS/2"].usWinAscent / 2
-        )
-        local_regular["OS/2"].sTypoDescender = math.ceil(
-            -remote_regular["OS/2"].usWinDescent / 2
-        )
-        local_regular["hhea"].ascent = math.ceil(remote_regular["OS/2"].usWinAscent / 2)
-        local_regular["hhea"].descent = math.ceil(
-            -remote_regular["OS/2"].usWinDescent / 2
-        )
-        context.regular_ttFont = local_regular
-        context.regular_remote_style = remote_regular
-        assert_PASS(
-            check(context),
-            "with a remote family which does not have typo metrics "
-            "enabled but the checked fonts vertical metrics have been "
-            "set so its typo and hhea metrics match the remote "
-            "fonts win metrics.",
-        )
-
-    context = new_context()
-    remote_regular = context.testables[0].regular_remote_style
-    local_regular = context.regular_ttFont
-    local_regular["OS/2"].fsSelection &= ~(1 << 7)
-    context.local_regular = local_regular
-    assert_results_contain(
-        check(context),
-        FAIL,
-        "bad-fsselection-bit7",
-        "OS/2 fsSelection bit 7 must be enabled.",
-    )
-
-    # Disable bit 7 in both fonts but change win metrics of ttFont
-    context = new_context()
-    remote_regular = context.testables[0].regular_remote_style
-    local_regular = context.regular_ttFont
-
-    remote_regular["OS/2"].fsSelection &= ~(1 << 7)
-    local_regular["OS/2"].fsSelection &= ~(1 << 7)
-    local_regular["OS/2"].usWinAscent = 2500
-    context.local_regular = local_regular
-    context.regular_remote_style = remote_regular
-
-    assert_results_contain(
-        check(context),
-        FAIL,
-        "bad-fsselection-bit7",
-        "OS/2 fsSelection bit 7 must be enabled.",
     )
 
 

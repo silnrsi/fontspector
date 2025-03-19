@@ -22,6 +22,7 @@ fn coverage_required(subset: &str) -> f32 {
     }
     match subset {
         "math" | "symbols" => 0.5, // These are listed as "relaxed" subsets in gftools-add-font but seem to have the same defaults?
+        "devanagari" => 0.4,       // There are many vedic marks which mess up the percentage
         _ => 0.5,
     }
 }
@@ -138,7 +139,6 @@ fn subsets_correct(c: &TestableCollection, context: &Context) -> CheckFnResult {
         .map(|(k, v)| (k.to_string(), support_percentage(k, v, &codepoints)))
         .collect();
     for (name, percentage) in supported_percentage.into_iter() {
-        //println!("{}: {}", name, percentage);
         if percentage >= coverage_required(&name) && !subsets.contains(&name) {
             problems.push(Status::warn(
                     "missing-subset",

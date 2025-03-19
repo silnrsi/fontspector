@@ -1,5 +1,4 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::{tables::os2::SelectionFlags, TableProvider};
 
 #[check(
     id = "googlefonts/use_typo_metrics",
@@ -32,12 +31,7 @@ fn use_typo_metrics(t: &Testable, context: &Context) -> CheckFnResult {
         "cjk",
         "This check does not apply to CJK fonts."
     );
-    if !f
-        .font()
-        .os2()?
-        .fs_selection()
-        .intersects(SelectionFlags::USE_TYPO_METRICS)
-    {
+    if !f.use_typo_metrics()? {
         Ok(Status::just_one_fail(
             "missing-os2-fsselection-bit7",
             "OS/2.fsSelection bit 7 (USE_TYPO_METRICS) was NOT set.",
