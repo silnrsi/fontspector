@@ -564,3 +564,21 @@ pub struct VerticalMetrics {
     /// The hhea Line Gap
     pub hhea_linegap: i16,
 }
+
+impl VerticalMetrics {
+    /// Scale the vertical metrics to a different UPM
+    pub fn scale_to_upm(&self, other_upm: u16) -> VerticalMetrics {
+        let scaled_upm = other_upm as f32 / self.upm as f32;
+        VerticalMetrics {
+            upm: other_upm,
+            os2_typo_ascender: (self.os2_typo_ascender as f32 * scaled_upm).ceil() as i16,
+            os2_typo_descender: (self.os2_typo_descender as f32 * scaled_upm).ceil() as i16,
+            os2_typo_linegap: (self.os2_typo_linegap as f32 * scaled_upm).ceil() as i16,
+            os2_win_ascent: (self.os2_win_ascent as f32 * scaled_upm).ceil() as u16,
+            os2_win_descent: (self.os2_win_descent as f32 * scaled_upm).ceil() as u16,
+            hhea_ascent: (self.hhea_ascent as f32 * scaled_upm).ceil() as i16,
+            hhea_descent: (self.hhea_descent as f32 * scaled_upm).ceil() as i16,
+            hhea_linegap: (self.hhea_linegap as f32 * scaled_upm).ceil() as i16,
+        }
+    }
+}

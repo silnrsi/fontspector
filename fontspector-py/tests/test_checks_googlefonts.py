@@ -2919,27 +2919,22 @@ def test_check_cjk_vertical_metrics(check):
     )
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/cjk_vertical_metrics_regressions")
 def test_check_cjk_vertical_metrics_regressions(check):
     # TODO: try to remove deepcopy usage
     from copy import deepcopy
 
-    ttFont = TTFont(cjk_font)
-    regular_remote_style = deepcopy(ttFont)
-
-    # Check on duplicate
-    regular_remote_style = deepcopy(ttFont)
+    ttFont = TTFont(TEST_FILE("cjk/YujiBoku-Regular.ttf"))
     assert_PASS(
-        check(MockFont(ttFont=ttFont, regular_remote_style=regular_remote_style)),
-        "for Source Han Sans",
+        check(TEST_FILE("cjk/YujiBoku-Regular.ttf")),
+        "for Yuji Boku",
     )
 
     # Change a single metric
     ttFont2 = deepcopy(ttFont)
     ttFont2["hhea"].ascent = 0
     assert_results_contain(
-        check(MockFont(ttFont=ttFont2, regular_remote_style=regular_remote_style)),
+        check(ttFont2),
         FAIL,
         "cjk-metric-regression",
         "hhea ascent is 0 when it should be 880",
@@ -2949,7 +2944,7 @@ def test_check_cjk_vertical_metrics_regressions(check):
     ttFont3 = deepcopy(ttFont)
     ttFont3["head"].unitsPerEm = 2000
     assert_results_contain(
-        check(MockFont(ttFont=ttFont3, regular_remote_style=regular_remote_style)),
+        check(ttFont3),
         FAIL,
         "cjk-metric-regression",
         "upm is 2000 and vert metrics values are not updated",
@@ -2971,8 +2966,8 @@ def test_check_cjk_vertical_metrics_regressions(check):
         current_val = getattr(ttFont4[tbl], attrib)
         setattr(ttFont4[tbl], attrib, current_val * 2)
     assert_PASS(
-        check(MockFont(ttFont=ttFont4, regular_remote_style=regular_remote_style)),
-        "for Source Han Sans with doubled upm and doubled vert metrics",
+        check(ttFont4),
+        "for Yuji Boku with doubled upm and doubled vert metrics",
     )
 
 

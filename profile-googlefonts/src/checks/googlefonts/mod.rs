@@ -57,3 +57,5 @@ pub use vertical_metrics::vertical_metrics;
 pub use weightclass::weightclass;
 mod vertical_metrics_regressions;
 pub use vertical_metrics_regressions::vertical_metrics_regressions;
+mod cjk_vertical_metrics_regressions;
+pub use cjk_vertical_metrics_regressions::cjk_vertical_metrics_regressions;

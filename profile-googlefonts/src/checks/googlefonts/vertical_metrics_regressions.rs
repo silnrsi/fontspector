@@ -60,7 +60,7 @@ fn vertical_metrics_regressions(t: &Testable, context: &Context) -> CheckFnResul
     let local_has_typo_metrics = f.use_typo_metrics()?;
     let remote_metrics = remote_font.vertical_metrics()?;
     let local_metrics = f.vertical_metrics()?;
-    let upm_scale = local_metrics.upm as f32 / remote_metrics.upm as f32;
+    let remote_scaled_to_local = remote_metrics.scale_to_upm(local_metrics.upm);
 
     let (expected_ascender, expected_descender) = if gf_has_typo_metrics {
         if !local_has_typo_metrics {
@@ -68,22 +68,20 @@ fn vertical_metrics_regressions(t: &Testable, context: &Context) -> CheckFnResul
           "fsSelection bit 7 needs to be enabled because the family on Google Fonts has it enabled."));
         }
         (
-            (remote_metrics.os2_typo_ascender as f32 * upm_scale).ceil() as i16,
-            (remote_metrics.os2_typo_descender as f32 * upm_scale).ceil() as i16,
+            remote_scaled_to_local.os2_typo_ascender,
+            remote_scaled_to_local.os2_typo_descender,
         )
     } else {
-        if ((remote_metrics.os2_win_ascent as f32 * upm_scale) as u16
-            != local_metrics.os2_win_ascent
-            || (remote_metrics.os2_win_descent as f32 * upm_scale) as u16
-                != local_metrics.os2_win_descent)
+        if (remote_scaled_to_local.os2_win_ascent != local_metrics.os2_win_ascent
+            || remote_scaled_to_local.os2_win_descent != local_metrics.os2_win_descent)
             && !local_has_typo_metrics
         {
             problems.push(Status::fail("bad-fsselection-bit7",
         "fsSelection bit 7 needs to be enabled because the win metrics differ from the family on Google Fonts."));
         }
         (
-            (remote_metrics.os2_win_ascent as f32 * upm_scale).ceil() as i16,
-            -(remote_metrics.os2_win_descent as f32 * upm_scale).ceil() as i16,
+            (remote_scaled_to_local.os2_win_ascent as i16),
+            -(remote_scaled_to_local.os2_win_descent as i16),
         )
     };
 
