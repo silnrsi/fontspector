@@ -2514,7 +2514,6 @@ def test_check_repo_dirname_match_nameid_1(check, tmp_path):
     assert "Unfulfilled Conditions: gfonts_repo_structure" in msg
 
 
-@pytest.mark.skip("Check not ported yet.")
 @check_id("googlefonts/repo/vf_has_static_fonts")
 def test_check_repo_vf_has_static_fonts(check, tmp_path):
     """Check VF family dirs in google/fonts contain static fonts"""
@@ -2525,12 +2524,12 @@ def test_check_repo_vf_has_static_fonts(check, tmp_path):
     tmp_gf_dir = tmp_path / "repo_vf_has_static_fonts"
     tmp_gf_dir.mkdir()
     family_dir = tmp_gf_dir / "ofl/testfamily"
-    src_family = portable_path("data/test/varfont")
+    src_family = portable_path("data/test/varfont/inter")
 
     shutil.copytree(src_family, family_dir, dirs_exist_ok=True)
 
     assert_PASS(
-        check(MockFont(file=family_dir / "foo", family_directory=family_dir)),
+        check([str(x) for x in family_dir.glob("**/*") if x.is_file()]),
         "for a VF family which does not have a static dir.",
     )
 
@@ -2540,7 +2539,7 @@ def test_check_repo_vf_has_static_fonts(check, tmp_path):
     shutil.rmtree(static_dir)
     shutil.copytree(static_fonts, static_dir)
     assert_PASS(
-        check(MockFont(file=family_dir / "foo", family_directory=family_dir)),
+        check([str(x) for x in family_dir.glob("**/*") if x.is_file()]),
         "for a VF family which has a static dir and manually hinted static fonts",
     )
 
@@ -2553,7 +2552,7 @@ def test_check_repo_vf_has_static_fonts(check, tmp_path):
     )
 
     assert_results_contain(
-        check(MockFont(file=family_dir / "foo", family_directory=family_dir)),
+        check([str(x) for x in family_dir.glob("**/*") if x.is_file()]),
         WARN,
         "not-manually-hinted",
         "for a VF family which has a static dir but no manually hinted static fonts",

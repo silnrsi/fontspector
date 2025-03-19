@@ -59,3 +59,4 @@ mod vertical_metrics_regressions;
 pub use vertical_metrics_regressions::vertical_metrics_regressions;
 mod cjk_vertical_metrics_regressions;
 pub use cjk_vertical_metrics_regressions::cjk_vertical_metrics_regressions;
+pub mod repo;

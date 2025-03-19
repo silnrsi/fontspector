@@ -124,7 +124,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::name::rfn)
             .add_section("Repository Checks")
             //            .add_and_register_check(checks::googlefonts::repo::dirname_matches_nameid_1)
-            //            .add_and_register_check(checks::googlefonts::repo::vf_has_static_fonts)
+            .add_and_register_check(checks::googlefonts::repo::vf_has_static_fonts)
             //            checks::googlefonts::repo::fb_report // Upstream repos should be checked separately
             //            checks::googlefonts::repo::sample_image // Upstream repos should be checked separately
             //            checks::googlefonts::repo::upstream_yaml_has_required_fields // Redundant, no upstream.yaml any more
