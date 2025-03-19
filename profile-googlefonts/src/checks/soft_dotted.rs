@@ -117,6 +117,13 @@ fn soft_dotted(t: &Testable, context: &Context) -> CheckFnResult {
 
     let face = Face::from_slice(&t.contents, 0)
         .ok_or(CheckError::Error("Failed to load font file".to_string()))?;
+    let plan = rustybuzz::ShapePlan::new(
+        &face,
+        rustybuzz::Direction::LeftToRight,
+        Some(rustybuzz::script::LATIN),
+        None,
+        &[],
+    );
 
     let mut fail_unchanged_strings = vec![];
     let mut warn_unchanged_strings = vec![];
@@ -153,7 +160,7 @@ fn soft_dotted(t: &Testable, context: &Context) -> CheckFnResult {
                 };
                 let mut buffer = UnicodeBuffer::new();
                 buffer.push_str(&text);
-                let buffer = rustybuzz::shape(&face, &[], buffer);
+                let buffer = rustybuzz::shape_with_plan(&face, &plan, buffer);
                 let flags = rustybuzz::SerializeFlags::NO_POSITIONS
                     | rustybuzz::SerializeFlags::NO_ADVANCES
                     | rustybuzz::SerializeFlags::NO_CLUSTERS

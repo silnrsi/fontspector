@@ -2,7 +2,7 @@ use crate::{
     checks::googlefonts::metadata::{family_proto, DesignerInfoProto},
     network_conditions::{is_designer_listed, DESIGNER_INFO_RAW_URL},
 };
-use fontspector_checkapi::prelude::*;
+use fontspector_checkapi::{prelude::*, skip};
 
 const NAME_DEUNICODIZATION: [(&str, &str); 19] = [
     ("á", "a"),
@@ -64,6 +64,11 @@ fn designer_profiles(c: &Testable, context: &Context) -> CheckFnResult {
     let msg = family_proto(c).map_err(|e| {
         CheckError::Error(format!("METADATA.pb is not a valid FamilyProto: {:?}", e))
     })?;
+    skip!(
+        context.skip_network,
+        "network-disabled",
+        "Skipping network check"
+    );
     let mut problems = vec![];
     for designer in msg.designer().split(",") {
         let designer = normalize_designer_name(designer.trim());

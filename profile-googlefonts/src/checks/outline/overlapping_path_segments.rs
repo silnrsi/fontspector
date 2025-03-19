@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use hashbrown::HashSet;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
 use kurbo::ParamCurve;

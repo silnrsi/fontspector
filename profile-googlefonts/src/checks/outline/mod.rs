@@ -27,14 +27,15 @@ where
 pub(crate) fn name_and_bezglyph<'a>(
     f: &'a TestFont,
 ) -> impl Iterator<Item = (String, Result<BezGlyph, CheckError>)> + 'a {
-    f.all_glyphs().map(|glyph| {
+    let reverse_char_map = f
+        .font()
+        .charmap()
+        .mappings()
+        .map(|(cp, gid)| (gid, cp))
+        .collect::<std::collections::HashMap<_, _>>();
+    f.all_glyphs().map(move |glyph| {
         let mut name = f.glyph_name_for_id_synthesise(glyph);
-        if let Some((cp, _gid)) = f
-            .font()
-            .charmap()
-            .mappings()
-            .find(|(_cp, gid)| *gid == glyph)
-        {
+        if let Some(cp) = reverse_char_map.get(&glyph) {
             name = format!("{} (U+{:04X})", name, cp);
         }
         let mut pen = BezGlyph::default();
