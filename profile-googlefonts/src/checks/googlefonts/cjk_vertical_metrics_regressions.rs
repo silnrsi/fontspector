@@ -1,7 +1,5 @@
-use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use skrifa::MetadataProvider;
-
 use crate::network_conditions::remote_styles;
+use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
 
 #[check(
     id = "googlefonts/cjk_vertical_metrics_regressions",
