@@ -2,6 +2,7 @@ use crate::Args;
 use fontspector_checkapi::{CheckResult, Registry, StatusCode};
 use std::collections::HashMap;
 
+pub(crate) mod csv;
 pub(crate) mod json;
 pub(crate) mod markdown;
 pub(crate) mod terminal;
