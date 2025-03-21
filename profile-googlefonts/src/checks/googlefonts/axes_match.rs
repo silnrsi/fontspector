@@ -31,6 +31,8 @@ fn axes_match(c: &TestableCollection, context: &Context) -> CheckFnResult {
     let name = msg.name().to_string();
     let family = msg.display_name.as_ref().unwrap_or(&name);
     let mut problems: Vec<Status> = vec![];
+    skip!(msg.axes.is_empty(), "not-variable", "Not a variable font");
+
     let remote_styles = remote_styles(family, context).map_err(CheckError::Error)?;
     let mut missing_axes = HashSet::new();
 
