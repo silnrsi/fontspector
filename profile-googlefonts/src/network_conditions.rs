@@ -104,7 +104,10 @@ fn remote_styles_impl(family: &str, context: &Context) -> Result<Vec<Testable>, 
                 .and_then(|x| x.as_object())
                 .and_then(|x| x.get("fileRefs"))
                 .and_then(|x| x.as_array())
-                .ok_or("Failed to find fileRefs in manifest".to_string())?
+                .ok_or(format!(
+                    "Failed to find fileRefs in manifest: {:?}",
+                    manifest
+                ))?
             {
                 let url = file
                     .as_object()
