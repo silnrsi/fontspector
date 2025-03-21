@@ -9,6 +9,9 @@ pub struct Universal;
 
 impl fontspector_checkapi::Plugin for Universal {
     fn register(&self, cr: &mut Registry<'_>) -> Result<(), String> {
+        // Fontwerk check, not added to profile but here's a good place to put it.
+        cr.register_check(checks::ytlc_sanity);
+
         let builder = ProfileBuilder::new()
             .include_profile("opentype")
             .add_section("Universal Profile Checks")
