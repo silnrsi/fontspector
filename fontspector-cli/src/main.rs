@@ -6,6 +6,7 @@ mod reporters;
 
 use std::{
     collections::HashMap,
+    io::Read,
     path::PathBuf,
     time::{Duration, Instant},
 };
@@ -14,16 +15,16 @@ use args::Args;
 use clap::Parser;
 use fontbakery_bridge::FontbakeryBridge;
 use fontspector_checkapi::{
-    Check, CheckResult, Context, FixResult, HotfixFunction, Plugin, Registry, StatusCode, Testable,
-    TestableCollection, TestableType,
+    Check, CheckResult, Context, FixResult, HotfixFunction, Plugin, Profile, Registry, StatusCode,
+    Testable, TestableCollection, TestableType,
 };
 use itertools::Either;
 use profile_googlefonts::GoogleFonts;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
 use reporters::{
-    json::JsonReporter, markdown::MarkdownReporter, terminal::TerminalReporter, Reporter,
-    RunResults,
+    csv::CsvReporter, json::JsonReporter, markdown::MarkdownReporter, terminal::TerminalReporter,
+    Reporter, RunResults,
 };
 use serde_json::{json, Map};
 
@@ -92,8 +93,42 @@ fn main() {
         }
     }
 
-    // Load the relevant profile
-    let profile = registry.get_profile(&args.profile).unwrap_or_else(|| {
+    // Load the relevant profile - maybe it's a file?
+    let profile_name = if args.profile.ends_with(".toml") {
+        // Name should be path basename without extension
+        let path = PathBuf::from(&args.profile);
+        let name = path.file_stem().unwrap_or_default().to_string_lossy();
+        match std::fs::File::open(&path) {
+            Ok(mut file) => {
+                log::info!("Loading profile from file {:?}", name);
+                let mut toml = String::new();
+                if let Err(e) = file.read_to_string(&mut toml) {
+                    log::error!("Could not read profile {:}: {:}", name, e);
+                    std::process::exit(1);
+                }
+                let profile: Profile = Profile::from_toml(&toml).unwrap_or_else(|e| {
+                    log::error!("Could not parse profile {:}: {:}", name, e);
+                    std::process::exit(1);
+                });
+
+                registry
+                    .register_profile(&name, profile)
+                    .unwrap_or_else(|e| {
+                        log::error!("Could not register profile {:}: {:}", name, e);
+                        std::process::exit(1);
+                    });
+            }
+            Err(e) => {
+                log::error!("Could not open profile file {:}: {:?}", args.profile, e);
+                std::process::exit(1);
+            }
+        }
+        name.to_string()
+    } else {
+        args.profile.clone()
+    };
+
+    let profile = registry.get_profile(&profile_name).unwrap_or_else(|| {
         log::error!("Could not find profile {:}", args.profile);
         std::process::exit(1);
     });
