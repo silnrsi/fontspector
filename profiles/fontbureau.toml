@@ -1,0 +1,7 @@
+# Ported from FontBakery profile fontbureau.py
+
+# Included profiles
+include_profiles = ["universal"]
+
+[sections]
+"Font Bureau Checks" = ["fontbureau/ytlc_sanity"]
