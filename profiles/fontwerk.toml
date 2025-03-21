@@ -1,4 +1,4 @@
-# Ported from FontBakery profile /Users/simon/others-repos/fontbakery/Lib/fontbakery/profiles/fontwerk.py
+# Ported from FontBakery profile fontwerk.py
 
 # Included profiles
 include_profiles = ["googlefonts"]
