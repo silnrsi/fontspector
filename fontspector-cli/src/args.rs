@@ -73,6 +73,10 @@ pub struct Args {
     #[clap(long, help_heading = "Reports")]
     pub json: Option<String>,
 
+    /// Write a CSV formatted report to the given filename
+    #[clap(long, help_heading = "Reports")]
+    pub csv: Option<String>,
+
     /// Write a GitHub-Markdown formatted report to the given filename
     #[clap(long, help_heading = "Reports")]
     pub ghmarkdown: Option<String>,

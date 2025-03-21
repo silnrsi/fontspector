@@ -267,7 +267,9 @@ fn main() {
     if let Some(mdfile) = args.ghmarkdown.as_ref() {
         reporters.push(Box::new(MarkdownReporter::new(mdfile)));
     }
-
+    if let Some(csvfile) = args.csv.as_ref() {
+        reporters.push(Box::new(CsvReporter::new(csvfile)));
+    }
     for reporter in reporters {
         reporter.report(&results, &args, &registry);
     }
