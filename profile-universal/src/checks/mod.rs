@@ -61,6 +61,7 @@ mod vtt_volt_data;
 mod whitespace_glyphs;
 mod whitespace_ink;
 mod whitespace_widths;
+mod ytlc_sanity;
 
 pub mod name;
 
@@ -124,5 +125,6 @@ pub use vtt_volt_data::vtt_volt_data;
 pub use whitespace_glyphs::whitespace_glyphs;
 pub use whitespace_ink::whitespace_ink;
 pub use whitespace_widths::whitespace_widths;
+pub use ytlc_sanity::ytlc_sanity;
 pub use STAT_in_statics::STAT_in_statics;
 pub use STAT_strings::STAT_strings;
