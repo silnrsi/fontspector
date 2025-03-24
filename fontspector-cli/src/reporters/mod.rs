@@ -88,20 +88,23 @@ pub trait Reporter {
 }
 
 pub fn create_user_home_templates_directory(force: bool) -> PathBuf {
+    #[allow(clippy::expect_used)] // Something seriously wrong here if this fails
     let home = homedir::my_home()
         .expect("Couldn't got home directory")
         .expect("No home directory found");
     let templates_dir = home.join(".fontspector/");
     if !templates_dir.exists() {
         std::fs::create_dir_all(&templates_dir).unwrap_or_else(|e| {
-            println!("Couldn't create {}: {}", templates_dir.to_str().unwrap(), e);
+            println!("Couldn't create {:?}: {}", templates_dir.to_str(), e);
             std::process::exit(1);
         });
     }
     let buf_reader = std::io::Cursor::new(TEMPLATES_ZIP);
+    #[allow(clippy::expect_used)] // Internal error
     let mut zip =
         zip::ZipArchive::new(buf_reader).expect("Internal error: bundled templates zip is invalid");
     for i in 0..zip.len() {
+        #[allow(clippy::expect_used)] // Internal error
         let mut file = zip
             .by_index(i)
             .expect("Internal error: couldn't read from templates zip file");
@@ -112,9 +115,8 @@ pub fn create_user_home_templates_directory(force: bool) -> PathBuf {
             // Create any intermediate subdirectories
             if let Some(parent) = path.parent() {
                 if !parent.exists() {
-                    println!("Creating directory {}", parent.to_str().unwrap());
                     std::fs::create_dir_all(parent).unwrap_or_else(|e| {
-                        println!("Couldn't create {}: {}", parent.to_str().unwrap(), e);
+                        println!("Couldn't create {:?}: {}", parent.to_str(), e);
                         std::process::exit(1);
                     });
                 }
@@ -123,20 +125,12 @@ pub fn create_user_home_templates_directory(force: bool) -> PathBuf {
                 continue;
             }
             let mut writer = std::fs::File::create(&path).unwrap_or_else(|e| {
-                println!(
-                    "Couldn't create template file {}: {}",
-                    path.to_str().unwrap(),
-                    e
-                );
+                println!("Couldn't create template file {:?}: {}", path.to_str(), e);
                 std::process::exit(1)
             });
 
             std::io::copy(&mut file, &mut writer).unwrap_or_else(|e| {
-                println!(
-                    "Couldn't write template file {}: {}",
-                    path.to_str().unwrap(),
-                    e
-                );
+                println!("Couldn't write template file {:?}: {}", path.to_str(), e);
                 std::process::exit(1)
             });
         }

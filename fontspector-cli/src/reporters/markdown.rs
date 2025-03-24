@@ -50,9 +50,12 @@ fn emoticon(v: &Value, _options: &HashMap<String, Value>) -> tera::Result<Value>
 impl MarkdownReporter {
     pub fn new(filename: &str, update_templates: bool) -> Self {
         let homedir = create_user_home_templates_directory(update_templates);
+        #[allow(clippy::expect_used)] // Internal error
         let mut tera = Tera::new(&format!(
             "{}/templates/markdown/*",
-            homedir.to_str().unwrap()
+            homedir
+                .to_str()
+                .expect("Internal error reading template directory")
         ))
         .unwrap_or_else(|e| {
             log::error!("Error parsing Markdown templates: {:?}", e);
