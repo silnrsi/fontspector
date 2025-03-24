@@ -265,7 +265,10 @@ fn main() {
         reporters.push(Box::new(JsonReporter::new(jsonfile)));
     }
     if let Some(mdfile) = args.ghmarkdown.as_ref() {
-        reporters.push(Box::new(MarkdownReporter::new(mdfile)));
+        reporters.push(Box::new(MarkdownReporter::new(
+            mdfile,
+            args.update_templates,
+        )));
     }
     if let Some(csvfile) = args.csv.as_ref() {
         reporters.push(Box::new(CsvReporter::new(csvfile)));
