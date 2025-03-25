@@ -49,12 +49,12 @@ impl StatusCode {
     /// selecting the minimum reported status.
     pub fn all() -> impl Iterator<Item = StatusCode> {
         vec![
-            StatusCode::Error,
-            StatusCode::Fail,
-            StatusCode::Warn,
-            StatusCode::Info,
             StatusCode::Skip,
+            StatusCode::Info,
             StatusCode::Pass,
+            StatusCode::Warn,
+            StatusCode::Fail,
+            StatusCode::Error,
         ]
         .into_iter()
     }
