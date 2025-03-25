@@ -8,6 +8,8 @@ use fontspector_checkapi::Registry;
 use serde_json::json;
 use tera::{Context, Tera, Value};
 
+use super::create_user_home_templates_directory;
+
 pub(crate) struct MarkdownReporter {
     filename: String,
     tera: Tera,
@@ -46,8 +48,16 @@ fn emoticon(v: &Value, _options: &HashMap<String, Value>) -> tera::Result<Value>
 }
 
 impl MarkdownReporter {
-    pub fn new(filename: &str) -> Self {
-        let mut tera = Tera::new("templates/markdown/*").unwrap_or_else(|e| {
+    pub fn new(filename: &str, update_templates: bool) -> Self {
+        let homedir = create_user_home_templates_directory(update_templates);
+        #[allow(clippy::expect_used)] // Internal error
+        let mut tera = Tera::new(&format!(
+            "{}/templates/markdown/*",
+            homedir
+                .to_str()
+                .expect("Internal error reading template directory")
+        ))
+        .unwrap_or_else(|e| {
             log::error!("Error parsing Markdown templates: {:?}", e);
             std::process::exit(1);
         });
@@ -132,5 +142,6 @@ impl Reporter for MarkdownReporter {
             );
             std::process::exit(1);
         });
+        println!("Markdown report written to {}", self.filename);
     }
 }

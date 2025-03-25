@@ -86,6 +86,10 @@ pub struct Args {
     #[clap(long, help_heading = "Reports")]
     pub ghmarkdown: Option<String>,
 
+    /// Copy bundled templates to user template directory
+    #[clap(long, help_heading = "Reports")]
+    pub update_templates: bool,
+
     /// Fall back to Python implementations of unported checks
     #[clap(long)]
     pub use_python: bool,

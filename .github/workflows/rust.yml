@@ -42,7 +42,7 @@ jobs:
       matrix:
         os:
           - build: linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
 
           - build: macos
@@ -67,6 +67,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           target: ${{ matrix.os.target }}
+          cache-key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
       - name: Set up python
         uses: actions/setup-python@v5
         with:

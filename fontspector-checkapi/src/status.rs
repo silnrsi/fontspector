@@ -8,10 +8,10 @@ use serde::{Deserialize, Serialize};
 pub enum StatusCode {
     /// Skip: the check didn't run because some condition was not met
     Skip,
-    /// Info: the check returned some useful information, but no problems
-    Info,
     /// Pass: there's no problem here
     Pass,
+    /// Info: the check returned some useful information, but no problems
+    Info,
     /// Warn: a problem which should be manually reviewed
     Warn,
     /// Fail: a problem materially affects the correctness of the font
