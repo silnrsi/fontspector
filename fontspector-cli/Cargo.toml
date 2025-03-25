@@ -25,6 +25,7 @@ log = { workspace = true }
 env_logger = "0.8"
 rayon = "1.0.1"
 indicatif = { version = "0.17", features = ["rayon"] }
+homedir = "0.3.4"
 
 # Terminal reporter
 termimad = "0"
@@ -40,4 +41,7 @@ zip = "2.5"
 
 # CSV reporter
 csv = "1.3.1"
-homedir = "0.3.4"
+
+# DuckDB reporter
+duckdb = { version = "1.2.1", features = ["bundled"], optional=true }
+chrono = "0.4"

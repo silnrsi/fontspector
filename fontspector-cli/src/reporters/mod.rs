@@ -5,6 +5,8 @@ use std::{collections::HashMap, path::PathBuf};
 include!(concat!(env!("OUT_DIR"), "/templates.rs"));
 
 pub(crate) mod csv;
+#[cfg(feature = "duckdb")]
+pub(crate) mod duckdb;
 pub(crate) mod json;
 pub(crate) mod markdown;
 pub(crate) mod terminal;
