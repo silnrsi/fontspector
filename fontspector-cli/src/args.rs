@@ -77,6 +77,11 @@ pub struct Args {
     #[clap(long, help_heading = "Reports")]
     pub csv: Option<String>,
 
+    /// Write run output to DuckDb database
+    #[clap(long, help_heading = "Reports")]
+    #[cfg(feature = "duckdb")]
+    pub duckdb: Option<String>,
+
     /// Write a GitHub-Markdown formatted report to the given filename
     #[clap(long, help_heading = "Reports")]
     pub ghmarkdown: Option<String>,

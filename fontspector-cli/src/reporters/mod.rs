@@ -3,6 +3,8 @@ use fontspector_checkapi::{CheckResult, Registry, StatusCode};
 use std::collections::HashMap;
 
 pub(crate) mod csv;
+#[cfg(feature = "duckdb")]
+pub(crate) mod duckdb;
 pub(crate) mod json;
 pub(crate) mod markdown;
 pub(crate) mod terminal;

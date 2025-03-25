@@ -270,6 +270,12 @@ fn main() {
     if let Some(csvfile) = args.csv.as_ref() {
         reporters.push(Box::new(CsvReporter::new(csvfile)));
     }
+    #[cfg(feature = "duckdb")]
+    if let Some(duckdbfile) = args.duckdb.as_ref() {
+        reporters.push(Box::new(crate::reporters::duckdb::DuckDbReporter::new(
+            duckdbfile,
+        )));
+    }
     for reporter in reporters {
         reporter.report(&results, &args, &registry);
     }
