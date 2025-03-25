@@ -22,7 +22,7 @@ profile-googlefonts = { path = "../profile-googlefonts" }
 clap = { version = "4", features = ["derive"] }
 itertools = { workspace = true }
 log = { workspace = true }
-env_logger = "0.8"
+env_logger = "0.11"
 rayon = "1.0.1"
 indicatif = { version = "0.17", features = ["rayon"] }
 homedir = "0.3.4"
