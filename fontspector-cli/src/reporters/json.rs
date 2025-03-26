@@ -46,6 +46,11 @@ impl Reporter for JsonReporter {
             std::process::exit(1);
         });
 
+        if self.filename == "-" {
+            println!("{}", report);
+            return;
+        }
+
         std::fs::write(&self.filename, report).unwrap_or_else(|e| {
             log::error!("Error writing JSON report to {:}: {:}", self.filename, e);
             std::process::exit(1);

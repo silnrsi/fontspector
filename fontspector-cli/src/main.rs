@@ -54,6 +54,11 @@ fn main() {
         },
     ));
 
+    let any_reports_to_stdout = reporters::any_stdout(&args).unwrap_or_else(|e| {
+        print!("{}", e);
+        std::process::exit(1);
+    });
+
     #[cfg(not(debug_assertions))]
     if let Some(threads) = args.jobs {
         let mut builder = rayon::ThreadPoolBuilder::new().num_threads(threads);
@@ -211,17 +216,17 @@ fn main() {
     let count_of_files = testables.iter().filter(|x| x.is_single()).count();
     let count_of_families = testables.len() - count_of_files;
 
-    // if !args.quiet {
-    println!(
-        "Running {:} check{} on {} file{} in {} famil{}",
-        checkorder.len(),
-        if checkorder.len() == 1 { "" } else { "s" },
-        count_of_files,
-        if count_of_files == 1 { "" } else { "s" },
-        count_of_families,
-        if count_of_families == 1 { "y" } else { "ies" }
-    );
-    // }
+    if !any_reports_to_stdout {
+        println!(
+            "Running {:} check{} on {} file{} in {} famil{}",
+            checkorder.len(),
+            if checkorder.len() == 1 { "" } else { "s" },
+            count_of_files,
+            if count_of_files == 1 { "" } else { "s" },
+            count_of_families,
+            if count_of_families == 1 { "y" } else { "ies" }
+        );
+    }
 
     // Run all the things! Check all the fonts!
 
@@ -283,14 +288,14 @@ fn main() {
         reporter.report(&results, &args, &registry);
     }
 
-    if !args.quiet {
+    if !args.quiet && !any_reports_to_stdout {
         println!(
             "Ran {} checks in {:.3}s",
             checkorder.len(),
             start_time.elapsed().as_secs_f32()
         );
+        TerminalReporter::summary_report(results.summary());
     }
-    TerminalReporter::summary_report(results.summary());
 
     if args.verbose >= 1 {
         let mut per_test_time = HashMap::new();
