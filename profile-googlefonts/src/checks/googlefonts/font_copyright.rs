@@ -43,7 +43,8 @@ use crate::{checks::googlefonts::metadata::family_proto, constants::EXPECTED_COP
          (https://github.com/Omnibus-Type/ArchivoBlack)\"
 
     ",
-    proposal = "https://github.com/fonttools/fontbakery/pull/2383 and https://github.com/fonttools/fontbakery/issues/4829",
+    proposal = "https://github.com/fonttools/fontbakery/pull/2383",
+    proposal = "https://github.com/fonttools/fontbakery/issues/4829",
     title = "Copyright notices match canonical pattern in fonts",
     implementation = "all"
 )]

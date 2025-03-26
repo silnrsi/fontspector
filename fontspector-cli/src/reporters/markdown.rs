@@ -105,10 +105,15 @@ impl Reporter for MarkdownReporter {
         }
         let summary = results.summary();
 
-        let proposals: HashMap<String, String> = registry
+        let proposals: HashMap<String, Vec<String>> = registry
             .checks
             .iter()
-            .map(|(k, v)| (k.clone(), v.proposal.to_string()))
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    v.proposal.iter().map(|s| s.to_string()).collect(),
+                )
+            })
             .collect();
 
         let val: serde_json::Value = json!({
@@ -121,7 +126,7 @@ impl Reporter for MarkdownReporter {
             "experimental_checks": experimental_checks,
             "succinct": args.succinct,
             "total": results.len(),
-            "proposal": proposals,
+            "proposals": proposals,
         });
         let context = &Context::from_serialize(val).unwrap_or_else(|e| {
             log::error!("Error creating Markdown context: {:}", e);
