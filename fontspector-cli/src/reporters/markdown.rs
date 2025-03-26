@@ -116,7 +116,7 @@ impl Reporter for MarkdownReporter {
             "experimental_checks": experimental_checks,
             "succinct": args.succinct,
             "total": results.len(),
-            "proposal": proposals,
+            "proposals": proposals,
         });
         let context = &Context::from_serialize(val).unwrap_or_else(|e| {
             log::error!("Error creating Markdown context: {:}", e);
