@@ -95,10 +95,15 @@ impl Reporter for MarkdownReporter {
         }
         let summary = results.summary();
 
-        let proposals: HashMap<String, String> = registry
+        let proposals: HashMap<String, Vec<String>> = registry
             .checks
             .iter()
-            .map(|(k, v)| (k.clone(), v.proposal.to_string()))
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    v.proposal.iter().map(|s| s.to_string()).collect(),
+                )
+            })
             .collect();
 
         let val: serde_json::Value = json!({
