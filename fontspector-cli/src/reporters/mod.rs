@@ -139,3 +139,17 @@ pub fn create_user_home_templates_directory(force: bool) -> PathBuf {
     }
     templates_dir
 }
+
+pub(crate) fn any_stdout(args: &Args) -> Result<bool, String> {
+    let yes_stdout = Some("-".to_string());
+    let count_stdout = if args.json == yes_stdout { 1 } else { 0 }
+        + (if args.csv == yes_stdout { 1 } else { 0 })
+        + if args.ghmarkdown == yes_stdout { 1 } else { 0 };
+    if count_stdout > 1 {
+        Err("Only one of --json, --csv, or --ghmarkdown can be stdout".to_string())
+    } else if count_stdout == 1 {
+        Ok(true)
+    } else {
+        Ok(true)
+    }
+}

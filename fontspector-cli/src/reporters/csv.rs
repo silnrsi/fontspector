@@ -1,3 +1,5 @@
+use std::fs::File;
+
 use super::RunResults;
 use crate::{reporters::Reporter, Args};
 use fontspector_checkapi::Registry;
@@ -18,7 +20,12 @@ impl CsvReporter {
 impl Reporter for CsvReporter {
     fn report(&self, results: &RunResults, args: &Args, _registry: &Registry) {
         #[allow(clippy::unwrap_used)]
-        let mut wtr = csv::Writer::from_writer(std::fs::File::create(&self.filename).unwrap());
+        let outfile = if self.filename == "-" {
+            Box::new(std::io::stdout()) as Box<dyn std::io::Write>
+        } else {
+            Box::new(File::create(&self.filename).unwrap()) as Box<dyn std::io::Write>
+        };
+        let mut wtr = csv::Writer::from_writer(outfile);
         #[allow(clippy::unwrap_used)]
         wtr.write_record(["Filename", "Section", "Check ID", "Status", "Codes"])
             .unwrap();

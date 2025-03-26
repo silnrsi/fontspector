@@ -140,6 +140,10 @@ impl Reporter for MarkdownReporter {
                 log::error!("Error rendering Markdown report: {:?}", e);
                 std::process::exit(1);
             });
+        if self.filename == "-" {
+            println!("{}", rendered);
+            return;
+        }
         std::fs::write(&self.filename, rendered).unwrap_or_else(|e| {
             eprintln!(
                 "Error writing Markdown report to {:}: {:}",
