@@ -143,12 +143,22 @@ fn register_python_checks(modulename: &str, source: &str, cr: &mut Registry) -> 
                     py_rationale.extract()?
                 };
                 let py_proposal = obj.getattr("proposal")?;
-                let proposal: String = if py_proposal.is_instance_of::<PyList>() {
+                let proposals: Vec<String> = if py_proposal.is_instance_of::<PyList>() {
                     let r: Vec<String> = py_proposal.extract()?;
-                    r.join(", ")
+                    r.iter().map(|s| s.to_string()).collect()
                 } else {
-                    py_proposal.extract()?
+                    let s: String = py_proposal.extract()?;
+                    vec![s.to_string()]
                 };
+
+                // Collect into a Vec<&str> instead of a slice
+                // let leaked_proposals = leak_vec_string(proposals);
+                let leaked_proposals: &[&'static str] = proposals
+                    .into_iter()
+                    .map(|s| s.leak() as &'static str)
+                    .collect::<Vec<&'static str>>()
+                    .leak();
+
                 log::info!("Registered check: {}", id);
                 let metadata = json!({
                     "module": modulename,
@@ -158,7 +168,7 @@ fn register_python_checks(modulename: &str, source: &str, cr: &mut Registry) -> 
                     id: id.leak(),
                     title: title.leak(),
                     rationale: rationale.leak(),
-                    proposal: proposal.leak(),
+                    proposal: leaked_proposals,
                     hotfix: None,
                     fix_source: None,
                     applies_to: "TTF",
