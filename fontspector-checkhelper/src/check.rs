@@ -118,7 +118,8 @@ pub(crate) fn check_impl(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut new_sig = sig.clone();
     new_sig.ident = impl_ident.clone();
 
-    let proposal_items: Vec<syn::LitStr> = params.proposal
+    let proposal_items: Vec<syn::LitStr> = params
+        .proposal
         .iter()
         .map(|ident| syn::LitStr::new(&ident.to_string(), Span::call_site()))
         .collect();
@@ -157,7 +158,12 @@ pub(crate) fn check_impl(args: TokenStream, input: TokenStream) -> TokenStream {
         id.value(),
         title.value(),
         new_rationale,
-        params.proposal.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(" and ")
+        params
+            .proposal
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
     );
     quote!(
         #(#attrs)*
