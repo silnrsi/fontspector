@@ -18,7 +18,7 @@ parser.add_argument("check", help="The name of the check to port")
 parser.add_argument(
     "--profile",
     help="The name of the profile to port the check to",
-    choices=["googlefonts", "universal", "opentype"],
+    choices=["googlefonts", "universal", "opentype", "microsoft"],
     default="universal",
 )
 args = parser.parse_args()

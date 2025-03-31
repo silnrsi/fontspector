@@ -1,0 +1,18 @@
+mod copyright;
+pub use copyright::copyright;
+mod fstype;
+pub use fstype::fstype;
+mod license_description;
+pub use license_description::license_description;
+mod manufacturer;
+pub use manufacturer::manufacturer;
+mod trademark;
+pub use trademark::trademark;
+mod vendor_url;
+pub use vendor_url::vendor_url;
+mod version;
+pub use version::version;
+mod office_ribz_req;
+pub use office_ribz_req::office_ribz_req;
+mod vertical_metrics;
+pub use vertical_metrics::vertical_metrics;
