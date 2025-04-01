@@ -2,7 +2,7 @@ use fontspector_checkapi::{
     pens::BezGlyph, prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION,
 };
 use kurbo::{BezPath, ParamCurve};
-use read_fonts::{types::BoundingBox, TableProvider};
+use skrifa::raw::{types::BoundingBox, TableProvider};
 use skrifa::{
     prelude::{LocationRef, Size},
     MetadataProvider,

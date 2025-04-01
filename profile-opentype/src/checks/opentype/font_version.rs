@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::{types::NameId, TableProvider};
+use skrifa::raw::{types::NameId, TableProvider};
 use skrifa::MetadataProvider;
 
 #[check(

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, GetSubstitutionMap};
-use read_fonts::{tables::gsub::SubstitutionLookupList, ReadError, TableProvider};
+use skrifa::raw::{tables::gsub::SubstitutionLookupList, ReadError, TableProvider};
 use skrifa::{GlyphId16, MetadataProvider};
 use unicode_properties::{GeneralCategory, UnicodeGeneralCategory};
 

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 use skrifa::{outline::OutlinePen, MetadataProvider};
 
 use super::close_but_not_on;

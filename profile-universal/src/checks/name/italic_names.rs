@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::types::NameId;
+use skrifa::raw::types::NameId;
 
 #[check(
     id = "name/italic_names",

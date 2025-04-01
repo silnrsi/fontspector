@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 
 #[check(
     id = "opentype/post_table_version",

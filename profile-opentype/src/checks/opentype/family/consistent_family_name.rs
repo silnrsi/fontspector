@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, FileTypeConvert};
-use read_fonts::types::NameId;
+use skrifa::raw::types::NameId;
 use skrifa::MetadataProvider;
 
 #[check(

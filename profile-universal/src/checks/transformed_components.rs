@@ -2,7 +2,7 @@ use fontspector_checkapi::{fixfont, prelude::*, testfont, FileTypeConvert};
 use hashbrown::HashMap;
 use itertools::Itertools;
 use kurbo::Affine;
-use read_fonts::{
+use skrifa::raw::{
     tables::glyf::{Anchor, CurvePoint, Glyph, Transform},
     types::F2Dot14,
     FontData, TableProvider,

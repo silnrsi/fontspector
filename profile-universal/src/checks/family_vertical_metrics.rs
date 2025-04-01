@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, FileTypeConvert};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 
 #[check(
     id = "family/vertical_metrics",

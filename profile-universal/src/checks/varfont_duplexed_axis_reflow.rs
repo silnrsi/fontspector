@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
 use itertools::Itertools;
-use read_fonts::{
+use skrifa::raw::{
     tables::{
         glyf::Glyph,
         gpos::{
@@ -240,7 +240,7 @@ fn pairs_with_region_2(
 }
 
 fn grovel_item_variation_store(
-    value_record: &read_fonts::tables::gpos::ValueRecord,
+    value_record: &skrifa::raw::tables::gpos::ValueRecord,
     offset_data: FontData<'_>,
     var_store: &ItemVariationStore,
     effective_regions: &HashSet<u16>,

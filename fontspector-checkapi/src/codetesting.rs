@@ -2,8 +2,8 @@
 
 // No bad thing if we panic in tests
 use crate::{prelude::*, Check, CheckResult, Context, FileTypeConvert, StatusCode};
-use read_fonts::{types::NameId, TableProvider};
 use serde_json::Map;
+use skrifa::raw::{types::NameId, TableProvider};
 use write_fonts::{
     tables::name::{Name, NameRecord},
     FontBuilder,

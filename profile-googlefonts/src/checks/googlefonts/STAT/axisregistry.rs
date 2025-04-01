@@ -1,7 +1,7 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, TestFont};
 use google_fonts_axisregistry::AxisRegistry;
 use hashbrown::HashMap;
-use read_fonts::{tables::stat::AxisValue, TableProvider};
+use skrifa::raw::{tables::stat::AxisValue, TableProvider};
 use skrifa::{string::StringId, Tag};
 
 fn normalize_name(name: &str) -> String {

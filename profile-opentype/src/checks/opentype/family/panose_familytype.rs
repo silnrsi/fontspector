@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, FileTypeConvert, StatusCode, TestFont};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 
 #[check(
     id = "opentype/family/panose_familytype",

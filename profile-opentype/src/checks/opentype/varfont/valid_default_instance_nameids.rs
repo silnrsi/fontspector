@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::types::{F2Dot14, NameId};
+use skrifa::raw::types::{F2Dot14, NameId};
 use skrifa::MetadataProvider;
 
 #[check(

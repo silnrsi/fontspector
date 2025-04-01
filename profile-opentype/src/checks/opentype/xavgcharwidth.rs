@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 use skrifa::{GlyphId, MetadataProvider};
 
 const AVG_CHAR_WEIGHTS: [(char, u32); 27] = [

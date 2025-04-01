@@ -1,7 +1,7 @@
 use fontspector_checkapi::{
     pens::AreaPen, prelude::*, skip, testfont, FileTypeConvert, DEFAULT_LOCATION,
 };
-use read_fonts::tables::gdef::GlyphClassDef;
+use skrifa::raw::tables::gdef::GlyphClassDef;
 use skrifa::MetadataProvider;
 
 const ARABIC_LETTER_HAMZA: u32 = 0x0621;

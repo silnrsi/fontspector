@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::{tables::cmap::CmapSubtable, TableProvider};
+use skrifa::raw::{tables::cmap::CmapSubtable, TableProvider};
 
 #[check(
     id = "cmap/format_12",

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
 use itertools::Itertools;
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 use skrifa::{GlyphId, MetadataProvider};
 
 const COMMON_WIDTH_MATH_CHARS: [char; 314] = [

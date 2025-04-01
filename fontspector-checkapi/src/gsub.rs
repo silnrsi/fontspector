@@ -1,5 +1,5 @@
 // Code to make GSUB tables easier to work with
-use read_fonts::{
+use skrifa::raw::{
     tables::{
         gsub::{
             AlternateSubstFormat1, ExtensionSubstFormat1, LigatureSubstFormat1,

@@ -4,7 +4,7 @@ use fontspector_checkapi::{
     skip, testfont, FileTypeConvert, TestFont,
 };
 use hashbrown::{HashMap, HashSet};
-use read_fonts::{
+use skrifa::raw::{
     tables::{gdef::GlyphClassDef, gpos::PositionSubtables},
     TableProvider,
 };
