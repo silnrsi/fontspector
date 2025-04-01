@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 mod copyright;
 pub use copyright::copyright;
 mod fstype;
@@ -16,3 +17,5 @@ mod office_ribz_req;
 pub use office_ribz_req::office_ribz_req;
 mod vertical_metrics;
 pub use vertical_metrics::vertical_metrics;
+mod STAT_table_axis_order;
+pub use STAT_table_axis_order::STAT_table_axis_order;

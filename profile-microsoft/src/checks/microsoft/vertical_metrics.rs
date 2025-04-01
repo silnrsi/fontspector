@@ -55,7 +55,7 @@ fn vertical_metrics(t: &Testable, _context: &Context) -> CheckFnResult {
                 ),
             ));
         }
-        if metrics.hhea_descent.abs() as u16 != metrics.os2_win_descent {
+        if metrics.hhea_descent.unsigned_abs() != metrics.os2_win_descent {
             problems.push(Status::fail(
                 "mismatch",
                 &format!(

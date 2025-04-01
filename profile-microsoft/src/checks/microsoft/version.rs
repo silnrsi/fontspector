@@ -4,7 +4,8 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
 use regex::Regex;
 use skrifa::string::StringId;
 
-const VERSION_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"Version \d\.\d\d").unwrap());
+static VERSION_PATTERN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Version \d\.\d\d").unwrap());
 
 #[check(
     id = "microsoft/version",
