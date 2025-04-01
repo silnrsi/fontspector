@@ -2,7 +2,7 @@ use hashbrown::{HashMap, HashSet};
 
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, GetSubstitutionMap};
 use itertools::Itertools;
-use read_fonts::{
+use skrifa::raw::{
     tables::gpos::{PairPosFormat1, PairPosFormat2},
     ReadError, TableProvider,
 };

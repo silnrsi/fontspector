@@ -1,5 +1,5 @@
 use fontspector_checkapi::{constants::OutlineType, prelude::*, testfont, FileTypeConvert};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 use skrifa::FontRef;
 
 use crate::utils::build_expected_font;

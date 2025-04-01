@@ -23,7 +23,7 @@ indexmap = { workspace = true }
 itertools = { workspace = true }
 markdown-table = { workspace = true }
 protobuf = "3.7.1"
-read-fonts = { workspace = true }
+#read-fonts = { workspace = true }
 regex = "1.10.6"
 serde_json = { workspace = true }
 skrifa = { workspace = true }

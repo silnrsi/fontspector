@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{fixfont, prelude::*, testfont, FileTypeConvert};
-use read_fonts::{
+use skrifa::raw::{
     tables::{
         glyf::{Glyf, Glyph},
         loca::Loca,

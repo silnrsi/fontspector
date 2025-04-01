@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::{tables::name::Name, types::NameId, TableProvider};
+use skrifa::raw::{tables::name::Name, types::NameId, TableProvider};
 
 fn strip_ribbi(name: &str) -> String {
     name.replace(" Regular", "")

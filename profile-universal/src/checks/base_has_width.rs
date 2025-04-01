@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::tables::gdef::GlyphClassDef;
-use read_fonts::TableProvider;
+use skrifa::raw::tables::gdef::GlyphClassDef;
+use skrifa::raw::TableProvider;
 use skrifa::{GlyphId, MetadataProvider};
 use unicode_properties::{GeneralCategory, UnicodeGeneralCategory};
 

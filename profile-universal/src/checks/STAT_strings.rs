@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
 use itertools::Itertools;
-use read_fonts::{tables::stat::AxisValue, TableProvider};
+use skrifa::raw::{tables::stat::AxisValue, TableProvider};
 
 #[check(
     id = "STAT_strings",

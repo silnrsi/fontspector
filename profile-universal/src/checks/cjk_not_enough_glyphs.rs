@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, TestFont};
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 
 const CJK_CODEPAGE_BITS: [u8; 5] = [17, 18, 19, 20, 21];
 

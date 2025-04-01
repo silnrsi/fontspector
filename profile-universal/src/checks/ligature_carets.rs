@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::{tables::gdef::GlyphClassDef, TableProvider};
+use skrifa::raw::{tables::gdef::GlyphClassDef, TableProvider};
 use skrifa::GlyphId;
 
 #[check(

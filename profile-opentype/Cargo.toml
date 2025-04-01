@@ -10,7 +10,7 @@ authors = [
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = ["kurbo"] }
 fontspector-checkhelper = { workspace = true }
-read-fonts = { workspace = true }
+#read-fonts = { workspace = true }
 write-fonts = { workspace = true }
 skrifa = { workspace = true }
 itertools = {workspace = true }

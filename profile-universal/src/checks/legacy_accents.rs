@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::{tables::gdef::GlyphClassDef, TableProvider};
+use skrifa::raw::{tables::gdef::GlyphClassDef, TableProvider};
 use skrifa::MetadataProvider;
 
 const LEGACY_ACCENTS: [u32; 13] = [

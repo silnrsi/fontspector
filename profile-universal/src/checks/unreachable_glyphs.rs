@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, GetSubstitutionMap};
 use itertools::Itertools;
-use read_fonts::{
+use skrifa::raw::{
     tables::{
         colr::Paint,
         glyf::Glyph::{Composite, Simple},

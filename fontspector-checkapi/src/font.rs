@@ -4,7 +4,7 @@ use crate::{
     CheckError, Context, FileType, Testable,
 };
 use itertools::Either;
-use read_fonts::{
+use skrifa::raw::{
     tables::{
         gdef::GlyphClassDef,
         glyf::Glyph,
@@ -199,7 +199,7 @@ impl TestFont<'_> {
                         self._glyphnames.borrow_mut().extend(names);
                     }
                     Version16Dot16::VERSION_2_0 => {
-                        let strings: Vec<Option<read_fonts::tables::post::PString>> =
+                        let strings: Vec<Option<skrifa::raw::tables::post::PString>> =
                             post.string_data()?.iter().map(|x| x.ok()).collect();
                         if let Some(index) = post.glyph_name_index() {
                             let names = (0..self.glyph_count).map(|gid| {

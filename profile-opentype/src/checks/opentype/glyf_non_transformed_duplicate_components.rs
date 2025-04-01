@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::{
+use skrifa::raw::{
     tables::glyf::{Anchor, Glyph},
     TableProvider,
 };

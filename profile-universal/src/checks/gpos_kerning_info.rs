@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::{tables::gpos::PositionSubtables, TableProvider};
+use skrifa::raw::{tables::gpos::PositionSubtables, TableProvider};
 
 #[check(
     id = "gpos_kerning_info",

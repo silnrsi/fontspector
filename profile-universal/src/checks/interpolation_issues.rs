@@ -1,6 +1,6 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
 use interpolatable::{run_tests, Problem, ProblemDetails};
-use read_fonts::{tables::fvar::VariationAxisRecord, ReadError, TableProvider};
+use skrifa::raw::{tables::fvar::VariationAxisRecord, ReadError, TableProvider};
 use skrifa::{setting::VariationSetting, FontRef, GlyphId};
 
 fn lerp(a: f32, b: f32, t: f32) -> f32 {

@@ -1,7 +1,7 @@
 use fontspector_checkapi::{
     pens::AreaPen, prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION,
 };
-use read_fonts::TableProvider;
+use skrifa::raw::TableProvider;
 use skrifa::GlyphId;
 
 #[check(

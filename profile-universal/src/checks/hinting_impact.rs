@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, TestFont};
-use read_fonts::{tables::glyf::Glyf, ReadError, TableProvider};
+use skrifa::raw::{tables::glyf::Glyf, ReadError, TableProvider};
 use skrifa::{FontRef, GlyphId, Tag};
 use write_fonts::{
     from_obj::FromTableRef,
@@ -67,7 +67,7 @@ fn any_glyphs_have_instructions(font: &FontRef<'_>) -> Result<bool, ReadError> {
         .flatten()
         .take(100) // Limit to 100 glyphs to avoid performance issues
         .any(|g| match g {
-            read_fonts::tables::glyf::Glyph::Simple(simple) => !simple.instructions().is_empty(),
+            skrifa::raw::tables::glyf::Glyph::Simple(simple) => !simple.instructions().is_empty(),
             _ => false,
         }))
 }

@@ -19,7 +19,7 @@ interpolatable = { git = "https://github.com/simoncozens/interpolatable", featur
 ] } # For interpolation_issues
 fontspector-checkapi = { path = "../fontspector-checkapi" }
 fontspector-checkhelper = { workspace = true }
-read-fonts = { workspace = true }
+#read-fonts = { workspace = true }
 write-fonts = { workspace = true }
 skrifa = { workspace = true }
 itertools = { workspace = true }

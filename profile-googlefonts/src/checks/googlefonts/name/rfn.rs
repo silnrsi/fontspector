@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::{types::NameId, TableProvider};
+use skrifa::raw::{types::NameId, TableProvider};
 use regex::Regex;
 use skrifa::MetadataProvider;
 

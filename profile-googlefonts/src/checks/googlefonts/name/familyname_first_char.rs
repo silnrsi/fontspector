@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::types::NameId;
+use skrifa::raw::types::NameId;
 
 #[check(
     id = "googlefonts/name/familyname_first_char",

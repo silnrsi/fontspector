@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
-use read_fonts::{types::NameId, TableProvider};
+use skrifa::raw::{types::NameId, TableProvider};
 
 #[check(
     id = "opentype/name/postscript_vs_cff",

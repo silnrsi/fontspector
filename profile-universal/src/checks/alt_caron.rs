@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use read_fonts::tables::glyf::Glyph;
+use skrifa::raw::tables::glyf::Glyph;
 use skrifa::MetadataProvider;
 
 const CARON_CODEPOINTS: [u32; 4] = [

@@ -1,5 +1,5 @@
 use fontspector_checkapi::{prelude::*, FileTypeConvert, TestFont};
-use read_fonts::{
+use skrifa::raw::{
     tables::stat::{AxisValue, AxisValueTableFlags},
     ReadError, TableProvider,
 };
