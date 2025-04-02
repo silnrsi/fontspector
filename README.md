@@ -8,14 +8,15 @@ and is currently at an early alpha stage.
 
 Fontspector is made up of multiple crates:
 
-* `fontbakery-bridge`: Allows Python fontbakery checks to run inside fontspector
-* `fontspector-checkapi`: Defines the API and utility functions for check implementations
-* `fontspector-checkhelper`: Procedural macros to facilitate check implementations
-* `fontspector-cli`: The main fontspector executable
-* `fontspector-py`: A Python module exposing fontspector (for which see below)
-* `fontspector-web`: A WASM implementation of fontspector (for which see below)
-* `profile-testplugin`: An example of a runtime-loadable test profile
-* `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
+- `fontbakery-bridge`: Allows Python fontbakery checks to run inside fontspector
+- `fontspector-checkapi`: Defines the API and utility functions for check implementations
+- `fontspector-checkhelper`: Procedural macros to facilitate check implementations
+- `fontspector-cli`: The main fontspector executable
+- `fontspector-py`: A Python module exposing fontspector (for which see below)
+- `fontspector-web`: A WASM implementation of fontspector (for which see below)
+- `profile-testplugin`: An example of a runtime-loadable test profile
+- `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
+- `profile-microsoft`, ...: Additional profiles which are loaded at runtime (see below)
 
 ## Running the test suite
 
@@ -46,5 +47,26 @@ wasm-pack build
 cd www; npm install; npm run build
 ```
 
-The results appear in `../docs/`. Note that this requires Rust version
-1.81 *or older*.
+The results appear in `../docs/`.
+
+## Building plugin profiles
+
+Some profiles such as the Microsoft profile require additional tests in Rust
+to be registered with Fontspector. This is done through plugins, which are
+dynamic libraries containing Rust code which get loaded at runtime. The easiest
+way to build these profiles is to use `cargo-cp-artifact`, a Javascript utility.
+To do this:
+
+```
+npm install
+rpm run build-microsoft # build-test, build-...
+```
+
+This will produce a file called `microsoft.fontspectorplugin`; to use this, run
+
+```
+fontspector \
+    --plugins microsoft.fontspectorplugin \ # This loads the code
+    --profile microsoft \                   # This uses the profile defined in the plugin
+    MyFont.ttf
+```
