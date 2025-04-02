@@ -56,7 +56,7 @@ jobs:
           - build: windows-gnu
             os: windows-latest
             target: x86_64-pc-windows-gnu
-        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout
@@ -68,10 +68,10 @@ jobs:
         with:
           target: ${{ matrix.os.target }}
           cache-key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
-      - name: Set up python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
+      # - name: Set up python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ matrix.python }}
       - name: Install protoc for lang repo
         uses: arduino/setup-protoc@v3
         with:
@@ -94,7 +94,8 @@ jobs:
       - name: Build archive
         shell: bash
         run: |
-          dirname="fontspector-${{ env.VERSION }}-${{ matrix.os.target }}-py${{ matrix.python }}"
+          # dirname="fontspector-${{ env.VERSION }}-${{ matrix.os.target }}-py${{ matrix.python }}"
+          dirname="fontspector-${{ env.VERSION }}-${{ matrix.os.target }}"
           mkdir "$dirname"
           if [ "${{ matrix.os.os }}" = "windows-latest" ]; then
               mv "target/${{ matrix.os.target }}/release/"*.exe "$dirname"

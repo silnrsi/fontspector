@@ -18,6 +18,9 @@ Fontspector is made up of multiple crates:
 - `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
 - `profile-microsoft`, ...: Additional profiles which are loaded at runtime (see below)
 
+The fontspector CLI is built without Python support by default. If you want to run
+fontbakery checks inside fontspector, build with `cargo build --release --features python`. You can then use the `--use-python` flag at runtime to cause checks registered with Fontbakery to be run in Fontspector if no Rust implementation is available.
+
 ## Running the test suite
 
 We export the Fontspector check runner to a Python module, and then use

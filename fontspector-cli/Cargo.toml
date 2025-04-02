@@ -7,6 +7,9 @@ description = "Quality control for OpenType fonts"
 repository = "https://github.com/simoncozens/fontspector"
 license = "Apache-2.0"
 
+[features]
+python = ["dep:fontbakery-bridge"]
+
 [build-dependencies]
 walkdir = "2.5"
 zip = "2.5"
@@ -15,7 +18,7 @@ quote = "1.0"
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = ["clap"] }
 # These profiles are baked-in
-fontbakery-bridge = { path = "../fontbakery-bridge" }
+fontbakery-bridge = { path = "../fontbakery-bridge", optional = true }
 profile-universal = { path = "../profile-universal" }
 profile-opentype = { path = "../profile-opentype" }
 profile-googlefonts = { path = "../profile-googlefonts" }
@@ -43,5 +46,5 @@ zip = "2.5"
 csv = "1.3.1"
 
 # DuckDB reporter
-duckdb = { version = "1.2.1", features = ["bundled"], optional=true }
+duckdb = { version = "1.2.1", features = ["bundled"], optional = true }
 chrono = "0.4"
