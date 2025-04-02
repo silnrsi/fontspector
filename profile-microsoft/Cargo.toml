@@ -1,0 +1,21 @@
+[package]
+name = "profile-microsoft"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+fontspector-checkapi = { path = "../fontspector-checkapi", features = [
+    "kurbo",
+] }
+skrifa = { workspace = true }
+regex = "1.10.6"
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+# Plugin architecture
+pluginator = { workspace = true }
+
+# For tnum shaping
+rustybuzz = "0.20.1"

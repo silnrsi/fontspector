@@ -5,6 +5,7 @@ members = [
     "fontspector-cli",
     "fontspector-checkapi",
     "fontspector-checkhelper",
+    "profile-microsoft",
     "profile-opentype",
     "profile-universal",
     "profile-testplugin",

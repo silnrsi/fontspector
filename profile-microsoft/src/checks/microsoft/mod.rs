@@ -1,0 +1,27 @@
+#![allow(non_snake_case)]
+mod copyright;
+pub use copyright::copyright;
+mod fstype;
+pub use fstype::fstype;
+mod license_description;
+pub use license_description::license_description;
+mod manufacturer;
+pub use manufacturer::manufacturer;
+mod trademark;
+pub use trademark::trademark;
+mod vendor_url;
+pub use vendor_url::vendor_url;
+mod version;
+pub use version::version;
+mod office_ribz_req;
+pub use office_ribz_req::office_ribz_req;
+mod vertical_metrics;
+pub use vertical_metrics::vertical_metrics;
+mod STAT_table_axis_order;
+pub use STAT_table_axis_order::STAT_table_axis_order;
+mod fvar_STAT_axis_ranges;
+pub use fvar_STAT_axis_ranges::fvar_STAT_axis_ranges;
+mod STAT_axis_values;
+pub use STAT_axis_values::STAT_axis_values;
+mod STAT_table_eliding_bit;
+pub use STAT_table_eliding_bit::STAT_table_eliding_bit;
