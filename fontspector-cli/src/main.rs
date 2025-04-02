@@ -13,7 +13,10 @@ use std::{
 
 use args::Args;
 use clap::Parser;
+
+#[cfg(feature = "python")]
 use fontbakery_bridge::FontbakeryBridge;
+
 use fontspector_checkapi::{
     Check, CheckResult, Context, FixResult, HotfixFunction, Plugin, Profile, Registry, StatusCode,
     Testable, TestableCollection, TestableType,
@@ -71,6 +74,7 @@ fn main() {
     // Set up the check registry
     let mut registry = Registry::new();
 
+    #[cfg(feature = "python")]
     if args.use_python {
         // Python implementations first, I want to override them
         #[allow(clippy::expect_used)] // If this fails, I *want* to panic

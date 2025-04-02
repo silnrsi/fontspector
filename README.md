@@ -8,14 +8,17 @@ and is currently at an early alpha stage.
 
 Fontspector is made up of multiple crates:
 
-* `fontbakery-bridge`: Allows Python fontbakery checks to run inside fontspector
-* `fontspector-checkapi`: Defines the API and utility functions for check implementations
-* `fontspector-checkhelper`: Procedural macros to facilitate check implementations
-* `fontspector-cli`: The main fontspector executable
-* `fontspector-py`: A Python module exposing fontspector (for which see below)
-* `fontspector-web`: A WASM implementation of fontspector (for which see below)
-* `profile-testplugin`: An example of a runtime-loadable test profile
-* `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
+- `fontbakery-bridge`: Allows Python fontbakery checks to run inside fontspector
+- `fontspector-checkapi`: Defines the API and utility functions for check implementations
+- `fontspector-checkhelper`: Procedural macros to facilitate check implementations
+- `fontspector-cli`: The main fontspector executable
+- `fontspector-py`: A Python module exposing fontspector (for which see below)
+- `fontspector-web`: A WASM implementation of fontspector (for which see below)
+- `profile-testplugin`: An example of a runtime-loadable test profile
+- `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
+
+The fontspector CLI is built without Python support by default. If you want to run
+fontbakery checks inside fontspector, build with `cargo build --release --features python`. You can then use the `--use-python` flag at runtime to cause checks registered with Fontbakery to be run in Fontspector if no Rust implementation is available.
 
 ## Running the test suite
 
@@ -47,4 +50,4 @@ cd www; npm install; npm run build
 ```
 
 The results appear in `../docs/`. Note that this requires Rust version
-1.81 *or older*.
+1.81 _or older_.

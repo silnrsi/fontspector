@@ -92,6 +92,7 @@ pub struct Args {
 
     /// Fall back to Python implementations of unported checks
     #[clap(long)]
+    #[cfg(feature = "python")]
     pub use_python: bool,
 
     /// Hotfix found problems in the binaries
