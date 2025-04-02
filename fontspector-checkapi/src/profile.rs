@@ -21,6 +21,17 @@ pub struct Override {
     reason: String,
 }
 
+impl Override {
+    /// Create a new override
+    pub fn new(code: &str, status: StatusCode, reason: &str) -> Self {
+        Override {
+            code: code.to_string(),
+            status,
+            reason: reason.to_string(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Default)]
 /// A check profile
 ///
