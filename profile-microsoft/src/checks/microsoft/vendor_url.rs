@@ -4,6 +4,7 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
 use regex::Regex;
 use skrifa::string::StringId;
 
+#[allow(clippy::unwrap_used)]
 static VENDOR_PATTERN: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"https?://(\w+\.)?microsoft.com/?").unwrap());
 
