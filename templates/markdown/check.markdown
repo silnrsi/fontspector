@@ -1,3 +1,5 @@
+{% if not check.worst_status is omitted %}
+
 <details>
     <summary>{{check.worst_status | emoticon}} <b>{{check.worst_status}}</b> {{check.check_name}} ({{check.check_id}})</summary>
     <div>
@@ -12,7 +14,7 @@ Original proposal: {{proposals[check.check_id]}}
 {% endif %}
 
 {% for result in check.subresults |sort(attribute="severity") %}
-{% if not result is omitted %}
+{% if not result.severity is omitted %}
 
 - {{result.severity | emoticon }} **{{result.severity}}** {% if result is containing("message") %}{{result.message}}{% endif %} {%if result.code%}[code: {{result.code}}]{%endif%}
   {% endif %}
@@ -20,3 +22,4 @@ Original proposal: {{proposals[check.check_id]}}
 
 </div>
 </details>
+{% endif %}
