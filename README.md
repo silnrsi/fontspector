@@ -16,7 +16,7 @@ Fontspector is made up of multiple crates:
 - `fontspector-web`: A WASM implementation of fontspector (for which see below)
 - `profile-testplugin`: An example of a runtime-loadable test profile
 - `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
-- `profile-microsoft`, ...: Additional profiles which are loaded at runtime (see below)
+- `profile-microsoft`, `profile-adobe`, ...: Additional profiles which are loaded at runtime (see below)
 
 The fontspector CLI is built without Python support by default. If you want to run
 fontbakery checks inside fontspector, build with `cargo build --release --features python`. You can then use the `--use-python` flag at runtime to cause checks registered with Fontbakery to be run in Fontspector if no Rust implementation is available.
@@ -62,7 +62,7 @@ To do this:
 
 ```
 npm install
-rpm run build-microsoft # build-test, build-...
+rpm run build-microsoft # build-adobe, build-test...
 ```
 
 This will produce a file called `microsoft.fontspectorplugin`; to use this, run
