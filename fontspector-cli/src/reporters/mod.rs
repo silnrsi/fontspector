@@ -1,5 +1,7 @@
-use crate::Args;
+use crate::{reporters::csv::CsvReporter, Args};
 use fontspector_checkapi::{CheckResult, Registry, StatusCode};
+use jinja::JinjaTemplatedReporter;
+use json::JsonReporter;
 use std::{collections::HashMap, path::PathBuf};
 
 include!(concat!(env!("OUT_DIR"), "/templates.rs"));
@@ -7,8 +9,8 @@ include!(concat!(env!("OUT_DIR"), "/templates.rs"));
 pub(crate) mod csv;
 #[cfg(feature = "duckdb")]
 pub(crate) mod duckdb;
+pub(crate) mod jinja;
 pub(crate) mod json;
-pub(crate) mod markdown;
 pub(crate) mod terminal;
 
 /// The results of all checks in a check run
@@ -111,8 +113,6 @@ pub fn create_user_home_templates_directory(force: bool) -> PathBuf {
             .by_index(i)
             .expect("Internal error: couldn't read from templates zip file");
         let path = templates_dir.join(file.mangled_name());
-        println!("File: {:?}", file.mangled_name());
-        println!("Target: {:?}", path);
         if !path.exists() || force {
             // Create any intermediate subdirectories
             if let Some(parent) = path.parent() {
@@ -149,5 +149,32 @@ pub(crate) fn any_stdout(args: &Args) -> Result<bool, String> {
         1 => Ok(true),
         0 => Ok(false),
         _ => Err("Only one of --json, --csv, or --ghmarkdown can be stdout".to_string()),
+    }
+}
+
+pub(crate) fn process_reporter_args(args: &Args, reporters: &mut Vec<Box<dyn Reporter>>) {
+    if let Some(jsonfile) = args.json.as_ref() {
+        reporters.push(Box::new(JsonReporter::new(jsonfile)));
+    }
+    if let Some(mdfile) = args.ghmarkdown.as_ref() {
+        reporters.push(Box::new(JinjaTemplatedReporter::new_markdown(
+            mdfile,
+            args.update_templates,
+        )));
+    }
+    if let Some(htmlfile) = args.html.as_ref() {
+        reporters.push(Box::new(JinjaTemplatedReporter::new_html(
+            htmlfile,
+            args.update_templates,
+        )));
+    }
+    if let Some(csvfile) = args.csv.as_ref() {
+        reporters.push(Box::new(CsvReporter::new(csvfile)));
+    }
+    #[cfg(feature = "duckdb")]
+    if let Some(duckdbfile) = args.duckdb.as_ref() {
+        reporters.push(Box::new(crate::reporters::duckdb::DuckDbReporter::new(
+            duckdbfile,
+        )));
     }
 }
