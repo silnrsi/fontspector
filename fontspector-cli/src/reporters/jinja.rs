@@ -77,7 +77,7 @@ impl JinjaTemplatedReporter {
             update_templates,
             "Markdown",
             "markdown",
-            "main.md",
+            "main.markdown",
         )
     }
 
