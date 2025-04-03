@@ -1,0 +1,55 @@
+<h3>{{descriptions[check]}}</h3>
+<div class='check__idlabel'>Check ID: {{ check }}</div>
+
+<div class="rationale">
+    {% if results[0].check_rationale and not succinct %}
+        {{ results[0].check_rationale | unindent | markdown | safe }}
+{% endif %}
+{% if proposals[check] and not succinct %}
+    <ul>
+    {% for proposal in proposals[check] %}
+        {% if loop.index == 1 %}
+            <li>Original proposal: <a href="{{proposal}}">{{proposal}}</a></li>
+        {% else %}
+            <li>See also: <a href="{{proposal}}">{{proposal}}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% endif %}
+</div>
+
+{% for result in results %}
+    {% if result["worst_status"] is not omitted %}
+        <details>
+            <summary>
+                {{ result["worst_status"] | emoticon }}
+                {% if result.filename %}{{ result.filename | basename }}
+                {% else %}
+                Family Check
+                {% endif %}
+            </summary>
+            <div>
+                <ul>
+                {% for log in result.subresults %}
+                {% if log["severity"] is not omitted %}
+                        <li class='details_item'>
+                            <span class='details_indicator'>
+                            {{log["severity"] | emoticon}} {{log["severity"]}}
+                            </span>
+
+                            <span class='details_text'>
+                                {% if log is containing("message") %}
+                                    {{log["message"] | markdown | safe}}
+                                {% endif %}
+                                {% if log is containing("code") %}
+                                    {{" [code: " ~ log["code"] ~ "]"}}
+                                {% endif %}
+                            </span>
+                        </li>
+                {% endif %}
+                {% endfor %}
+                </ul>
+            </div>
+        </details>
+    {% endif %}
+{% endfor %}

@@ -86,6 +86,10 @@ pub struct Args {
     #[clap(long, help_heading = "Reports")]
     pub ghmarkdown: Option<String>,
 
+    /// Write a HTML formatted report to the given filename
+    #[clap(long, help_heading = "Reports")]
+    pub html: Option<String>,
+
     /// Copy bundled templates to user template directory
     #[clap(long, help_heading = "Reports")]
     pub update_templates: bool,

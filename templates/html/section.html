@@ -1,0 +1,6 @@
+<h2>{{ section_name }}</h2>
+{% for check, results in checks %}
+    {% if results is not omitted %}
+        {% include "check.html" %}
+    {% endif %}
+{% endfor %}

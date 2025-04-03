@@ -25,10 +25,7 @@ use itertools::Either;
 use profile_googlefonts::GoogleFonts;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
-use reporters::{
-    csv::CsvReporter, json::JsonReporter, markdown::MarkdownReporter, terminal::TerminalReporter,
-    Reporter, RunResults,
-};
+use reporters::{process_reporter_args, terminal::TerminalReporter, Reporter, RunResults};
 use serde_json::{json, Map};
 
 #[cfg(not(debug_assertions))]
@@ -270,24 +267,8 @@ fn main() {
     if !args.quiet {
         reporters.push(Box::new(TerminalReporter::new(args.succinct)));
     }
-    if let Some(jsonfile) = args.json.as_ref() {
-        reporters.push(Box::new(JsonReporter::new(jsonfile)));
-    }
-    if let Some(mdfile) = args.ghmarkdown.as_ref() {
-        reporters.push(Box::new(MarkdownReporter::new(
-            mdfile,
-            args.update_templates,
-        )));
-    }
-    if let Some(csvfile) = args.csv.as_ref() {
-        reporters.push(Box::new(CsvReporter::new(csvfile)));
-    }
-    #[cfg(feature = "duckdb")]
-    if let Some(duckdbfile) = args.duckdb.as_ref() {
-        reporters.push(Box::new(crate::reporters::duckdb::DuckDbReporter::new(
-            duckdbfile,
-        )));
-    }
+    process_reporter_args(&args, &mut reporters);
+
     for reporter in reporters {
         reporter.report(&results, &args, &registry);
     }

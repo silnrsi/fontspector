@@ -1,0 +1,12 @@
+<h2>Summary</h2>
+    <table>
+    <tr>
+        {%for level in summary_keys %}<th>{{level | emoticon }} {{level}}</th>{%endfor%}
+    </tr>
+    <tr>
+        {%for level in summary_keys %}<td>{{summary[level]}} </td> {%endfor%}
+    </tr>
+    <tr>
+        {%for level in summary_keys %}<td>{{summary[level] | percent(total=total)}}</td> {%endfor%}
+    </tr>
+</table>
