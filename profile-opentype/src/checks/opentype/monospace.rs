@@ -82,7 +82,7 @@ fn monospace(t: &Testable, context: &Context) -> CheckFnResult {
     if statistics.seems_monospaced {
         let number_of_h_metrics = font.font().hhea()?.number_of_h_metrics();
         if number_of_h_metrics != 3 {
-            problems.push(Status::fail(
+            problems.push(Status::warn(
                 "bad-numberOfHMetrics",
                 &format!(
                     "The OpenType spec recommends at https://learn.microsoft.com/en-us/typography/opentype/spec/recom#hhea-table that hhea.numberOfHMetrics be set to 3 but this font has {number_of_h_metrics} instead.\nPlease read https://github.com/fonttools/fonttools/issues/3014 to decide whether this makes sense for your font.",
