@@ -5,7 +5,7 @@ use serde_json::{Map, Value};
 use crate::{Check, CheckId, Context, Registry, StatusCode, TestableType};
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 /// An override directive
 ///
 /// Profiles may choose to override the status of a check if the vendor
@@ -14,11 +14,11 @@ use std::collections::HashMap;
 /// and a reason for the override.
 pub struct Override {
     /// Result code to match against
-    code: String,
+    pub code: String,
     /// Overridden status code
-    status: StatusCode,
+    pub status: StatusCode,
     /// Reason for the override
-    reason: String,
+    pub reason: String,
 }
 
 impl Override {
@@ -72,7 +72,7 @@ pub struct Profile {
     /// Overrides
     ///
     /// Override the severity of included checks. See [Override] for more information.
-    overrides: HashMap<CheckId, Vec<Override>>,
+    pub overrides: HashMap<CheckId, Vec<Override>>,
     #[serde(default)]
     /// Configuration defaults
     ///

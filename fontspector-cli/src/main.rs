@@ -18,8 +18,8 @@ use clap::Parser;
 use fontbakery_bridge::FontbakeryBridge;
 
 use fontspector_checkapi::{
-    Check, CheckResult, Context, FixResult, HotfixFunction, Plugin, Profile, Registry, StatusCode,
-    Testable, TestableCollection, TestableType,
+    Check, CheckResult, Context, FixResult, HotfixFunction, Override, Plugin, Profile, Registry,
+    StatusCode, Testable, TestableCollection, TestableType,
 };
 use itertools::Either;
 use profile_googlefonts::GoogleFonts;
@@ -195,6 +195,7 @@ fn main() {
 
     // Load configuration
     let configuration: Map<String, serde_json::Value> = load_configuration(&args);
+    let overrides = load_overrides(&configuration);
 
     // Establish a check order
     let checkorder: Vec<(String, &TestableType, &Check, Context)> = profile.check_order(
@@ -208,6 +209,7 @@ fn main() {
             check_metadata: serde_json::Value::Null,
             full_lists: args.full_lists,
             cache: Default::default(),
+            overrides,
         },
         configuration,
         &testables,
@@ -417,4 +419,27 @@ fn try_fixing_stuff(results: &mut RunResults, args: &Args, registry: &Registry) 
             });
         }
     }
+}
+
+fn load_overrides(configuration: &Map<String, serde_json::Value>) -> Vec<Override> {
+    let mut overrides = vec![];
+    if let Some(config_overrides) = configuration.get("overrides").and_then(|v| v.as_array()) {
+        for override_value in config_overrides {
+            if let Some(override_map) = override_value.as_object() {
+                if let (Some(code), Some(status), Some(reason)) = (
+                    override_map.get("code").and_then(|v| v.as_str()),
+                    override_map
+                        .get("status")
+                        .and_then(|v| v.as_str())
+                        .and_then(StatusCode::from_string),
+                    override_map.get("reason").and_then(|v| v.as_str()),
+                ) {
+                    overrides.push(Override::new(code, status, reason));
+                } else {
+                    log::warn!("Invalid override entry: {:?}", override_value);
+                }
+            }
+        }
+    }
+    overrides
 }

@@ -5,7 +5,7 @@ use std::{
 
 use serde_json::{Map, Value};
 
-use crate::{Check, Profile};
+use crate::{Check, Override, Profile};
 
 #[derive(Debug, Clone, Default)]
 /// The context of a check
@@ -31,6 +31,8 @@ pub struct Context {
     pub full_lists: bool,
     /// A cache, specific to this testable
     pub cache: Arc<RwLock<Map<String, Value>>>,
+    /// Any overrides for this check, from the profile or the user's configuration file.
+    pub overrides: Vec<Override>,
 }
 
 impl Context {
@@ -43,6 +45,7 @@ impl Context {
             check_metadata: self.check_metadata.clone(),
             full_lists: self.full_lists,
             cache: Arc::new(RwLock::new(Map::new())),
+            overrides: self.overrides.clone(),
         }
     }
 
@@ -80,6 +83,11 @@ impl Context {
                 }
             }
         }
+        // I'm not keen on these two clones, but overrides are rare; let's keep an eye
+        // on them and deal with them only if they're actually a problem.
+        let profile_overrides = profile.overrides.get(check.id).cloned().unwrap_or_default();
+        let mut our_overrides = self.overrides.clone();
+        our_overrides.extend(profile_overrides);
         Context {
             skip_network: self.skip_network,
             network_timeout: self.network_timeout,
@@ -87,6 +95,7 @@ impl Context {
             check_metadata: check.metadata(),
             full_lists: self.full_lists,
             cache: self.cache.clone(),
+            overrides: our_overrides,
         }
     }
 
