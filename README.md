@@ -24,7 +24,13 @@ You have two options for running the CLI tool - you can download our binaries, o
 
 Official release binaries will be available from the GitHub releases page once Fontspector 1.0 is released. In the meantime, if you want to try the latest command line binaries now, you can look in the [Actions page](https://github.com/fonttools/fontspector/actions/workflows/rust.yml).
 
-Similarly, once Fontspector 1.0 is released, you can build it from source with `cargo install fontspector`. (If you don't have a Rust compiler installed, you can use `brew install rustup` on macOS Homebrew or [rustup](https://rustup.rs) to install one.) Until then, you can build and install from source by either cloning this repository and running `cargo build --release` (which will place a `fontspector` binary in the `target/release` subdirectory), or by running `cargo install https://github.com/fonttools/fontspector/` (which will compile and then install the `fontspector` binary onto your system).
+Similarly, once Fontspector 1.0 is released, you can build it from source with `cargo install fontspector`. (If you don't have a Rust compiler installed, you can use `brew install rustup` on macOS Homebrew or [rustup](https://rustup.rs) to install one.) 
+
+Until then, you can build and install from source by either cloning this repository and running `cargo build --release` (which will place a `fontspector` binary in the `target/release` subdirectory), or by running `cargo install https://github.com/fonttools/fontspector/` (which will compile and then install the `fontspector` binary onto your system). On macOS you'll need to pre-install the [protobuf.dev](https://protobuf.dev) package, such as with Homebrew like this:
+
+    brew install protobuf
+    cargo build --release;
+    ./target/release/fontspector ~/font.ttf;
 
 The single `fontspector` binary contains all the built-in checks, profiles, and HTML/Markdown templates. As mentioned below, some profiles require additional plugin binaries.
 
