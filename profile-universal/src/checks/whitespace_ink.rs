@@ -1,10 +1,10 @@
 use fontspector_checkapi::{
-    pens::AnythingPen, prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION,
+    pens::HasInkPen, prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION,
 };
 use skrifa::MetadataProvider;
 use unicode_properties::{GeneralCategory, UnicodeGeneralCategory};
 
-const EXTRA_NON_DRAWING: [u32; 4] = [0x180E, 0x200B, 0x2060, 0xFEFF];
+const EXTRA_NON_DRAWING: [u32; 6] = [0x180E, 0x200B, 0x2028, 0x2029, 0x2060, 0xFEFF];
 const BUT_NOT: [u32; 2] = [0xAD, 0x1680];
 
 #[check(
@@ -16,6 +16,7 @@ const BUT_NOT: [u32; 2] = [0xAD, 0x1680];
            empty, the result will be text layout that is not as expected.
        ",
     proposal = "https://github.com/fonttools/fontbakery/issues/4829",
+    proposal = "https://github.com/fonttools/fontspector/issues/93",
     title = "Whitespace glyphs have ink?"
 )]
 fn whitespace_ink(t: &Testable, context: &Context) -> CheckFnResult {
@@ -41,14 +42,10 @@ fn whitespace_ink(t: &Testable, context: &Context) -> CheckFnResult {
             (cp, gid)
         })
         .filter(|(_cp, gid)| {
-            let mut anythingpen = AnythingPen::new();
-            f.draw_glyph(*gid, &mut anythingpen, DEFAULT_LOCATION)
+            let mut has_ink_pen = HasInkPen::new();
+            f.draw_glyph(*gid, &mut has_ink_pen, DEFAULT_LOCATION)
                 .ok()
-                .and(if anythingpen.anything() {
-                    Some(())
-                } else {
-                    None
-                })
+                .and(has_ink_pen.has_ink().then_some(()))
                 .is_some()
         })
         .map(|(_cp, gid)| f.glyph_name_for_id_synthesise(gid))
