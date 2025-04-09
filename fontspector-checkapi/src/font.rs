@@ -4,29 +4,26 @@ use crate::{
     CheckError, Context, FileType, Testable,
 };
 use itertools::Either;
-use skrifa::raw::{
-    tables::{
-        gdef::GlyphClassDef,
-        glyf::Glyph,
-        gpos::{PairPos, PairPosFormat1, PairPosFormat2, PositionSubtables},
-        head::MacStyle,
-        layout::{Feature, FeatureRecord},
-        os2::SelectionFlags,
-        post::DEFAULT_GLYPH_NAMES,
-    },
-    types::Version16Dot16,
-    ReadError, TableProvider,
-};
 use skrifa::{
     font::FontRef,
     outline::{DrawSettings, OutlinePen},
     prelude::Size,
+    raw::{
+        tables::{
+            gdef::GlyphClassDef,
+            glyf::Glyph,
+            gpos::{PairPos, PairPosFormat1, PairPosFormat2, PositionSubtables},
+            head::MacStyle,
+            layout::{Feature, FeatureRecord},
+            os2::SelectionFlags,
+        },
+        ReadError, TableProvider,
+    },
     setting::VariationSetting,
     string::StringId,
-    GlyphId, GlyphId16, MetadataProvider, Tag,
+    GlyphId, GlyphId16, GlyphNames, MetadataProvider, Tag,
 };
 use std::{
-    cell::RefCell,
     collections::{HashMap, HashSet},
     error::Error,
     fmt::{Debug, Formatter},
@@ -43,8 +40,6 @@ pub struct TestFont<'a> {
     // should be cheap as it is run for each check.
     /// The number of glyphs in the font
     pub glyph_count: usize,
-    /// A cache of the glyph names
-    _glyphnames: RefCell<Vec<Option<String>>>,
 }
 
 impl Debug for TestFont<'_> {
@@ -79,7 +74,6 @@ impl TestFont<'_> {
             filename: filename.to_path_buf(),
             font_data,
             glyph_count,
-            _glyphnames: RefCell::new(vec![]),
         })
     }
 
@@ -190,41 +184,15 @@ impl TestFont<'_> {
 
     /// Internal implementation for getting a glyph name
     fn glyph_name_for_id_impl(&self, gid: impl Into<GlyphId>, synthesize: bool) -> Option<String> {
-        let gid: GlyphId = gid.into();
-        if self._glyphnames.borrow().is_empty() {
-            if let Ok(post) = self.font().post() {
-                match post.version() {
-                    Version16Dot16::VERSION_1_0 => {
-                        let names = DEFAULT_GLYPH_NAMES.into_iter().map(|x| Some(x.to_string()));
-                        self._glyphnames.borrow_mut().extend(names);
-                    }
-                    Version16Dot16::VERSION_2_0 => {
-                        let strings: Vec<Option<skrifa::raw::tables::post::PString>> =
-                            post.string_data()?.iter().map(|x| x.ok()).collect();
-                        if let Some(index) = post.glyph_name_index() {
-                            let names = (0..self.glyph_count).map(|gid| {
-                                let idx = index.get(gid)?.get() as usize;
-                                if idx < 258 {
-                                    Some(DEFAULT_GLYPH_NAMES[idx].to_string())
-                                } else {
-                                    let entry = strings.get(idx - 258)?;
-                                    entry.map(|x| x.to_string())
-                                }
-                            });
-                            self._glyphnames.borrow_mut().extend(names);
-                        }
-                    }
-                    _ => {}
-                }
+        let names = GlyphNames::new(&self.font());
+        let proposed_name = names.get(gid.into());
+        proposed_name.and_then(|name| {
+            if name.is_synthesized() && !synthesize {
+                None
+            } else {
+                Some(name.as_str().to_string())
             }
-        }
-        if let Some(Some(n)) = self._glyphnames.borrow().get(gid.to_u32() as usize) {
-            Some(n.to_string())
-        } else if synthesize {
-            Some(format!("gid{}", gid.to_u32()))
-        } else {
-            None
-        }
+        })
     }
 
     /// Get a glyph's name by Glyph ID, if present in the font

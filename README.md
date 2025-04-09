@@ -18,7 +18,17 @@ Fontspector is made up of multiple crates:
 - `profile-googlefonts`, `profile-opentype`, `profile-universal`: Built in profiles and their check implementations
 - `profile-microsoft`, `profile-adobe`, ...: Additional profiles which are loaded at runtime (see below)
 
-The fontspector CLI is built without Python support by default. If you want to run
+## Running the CLI tool
+
+You have two options for running the CLI tool - you can download our binaries, or you can compile your own.
+
+Official release binaries will be available from the GitHub releases page once Fontspector 1.0 is released. In the meantime, if you want to try the latest command line binaries now, you can look in the [Actions page](https://github.com/fonttools/fontspector/actions/workflows/rust.yml).
+
+Similarly, once Fontspector 1.0 is released, you can build it from source with `cargo install fontspector`. (If you don't have a Rust compiler installed, you can use `brew install rustup` on macOS Homebrew or [rustup](https://rustup.rs) to install one.) Until then, you can build and install from source by either cloning this repository and running `cargo build --release` (which will place a `fontspector` binary in the `target/release` subdirectory), or by running `cargo install https://github.com/fonttools/fontspector/` (which will compile and then install the `fontspector` binary onto your system).
+
+The single `fontspector` binary contains all the built-in checks, profiles, and HTML/Markdown templates. As mentioned below, some profiles require additional plugin binaries.
+
+By default, fontspector CLI is built without Python support. If you want to run
 fontbakery checks inside fontspector, build with `cargo build --release --features python`. You can then use the `--use-python` flag at runtime to cause checks registered with Fontbakery to be run in Fontspector if no Rust implementation is available.
 
 ## Running the test suite
