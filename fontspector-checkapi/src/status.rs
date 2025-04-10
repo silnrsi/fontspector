@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
+
+use crate::Override;
 #[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Copy, Clone, Serialize, Deserialize, Hash)]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 #[serde(rename_all = "UPPERCASE")]
@@ -181,6 +183,24 @@ impl Status {
             message: Some(message.to_string()),
             code: code.map(|x| x.to_string()),
             severity: StatusCode::Error,
+        }
+    }
+
+    /// Apply an override to the status
+    ///
+    /// Overrides are provided by the profile or by the user's configuration file;
+    /// they are used to override the severity of a check result.
+    pub fn process_override(&mut self, overrides: &[Override]) {
+        let code = self.code.as_deref();
+        if let Some(override_) = overrides.iter().find(|x| Some(x.code.as_str()) == code) {
+            self.severity = override_.status;
+            self.message = Some(format!(
+                "{} (Overriden: {})",
+                self.message
+                    .clone()
+                    .unwrap_or("No original message".to_string()),
+                override_.reason
+            ))
         }
     }
 }

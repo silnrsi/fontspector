@@ -119,6 +119,7 @@ impl<'a> Check<'a> {
         filename: Option<&str>,
         source_filename: Option<&str>,
         section: Option<&str>,
+        context: &Context,
         duration: Duration,
     ) -> CheckResult {
         let subresults = match fn_result {
@@ -126,11 +127,14 @@ impl<'a> Check<'a> {
             Err(CheckError::Error(e)) => vec![Status::error(None, &format!("Error: {}", e))],
             Err(CheckError::Skip { code, message }) => vec![Status::skip(&code, &message)],
         };
-        let res = if subresults.is_empty() {
+        let mut res = if subresults.is_empty() {
             vec![Status::pass()]
         } else {
             subresults
         };
+        for status in res.iter_mut() {
+            status.process_override(&context.overrides);
+        }
         CheckResult::new(self, filename, source_filename, section, res, duration)
     }
 
@@ -162,6 +166,7 @@ impl<'a> Check<'a> {
                     f.filename.to_str(),
                     f.source.as_ref().and_then(|x| x.to_str()),
                     section,
+                    context,
                     duration,
                 ))
             }
@@ -174,7 +179,14 @@ impl<'a> Check<'a> {
                 #[cfg(target_family = "wasm")]
                 let duration = Duration::from_secs(0);
 
-                Some(self.clarify_result(result, Some(&f.directory), None, section, duration))
+                Some(self.clarify_result(
+                    result,
+                    Some(&f.directory),
+                    None,
+                    section,
+                    context,
+                    duration,
+                ))
             }
         }
     }

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use fontspector_checkapi::{
     constants::{ALL_HANGUL_SYLLABLES_CODEPOINTS, MODERN_HANGUL_SYLLABLES_CODEPOINTS},
-    pens::AnythingPen,
+    pens::HasInkPen,
     prelude::*,
     testfont, FileTypeConvert, TestFont, DEFAULT_LOCATION,
 };
@@ -93,7 +93,7 @@ fn empty_letters(t: &Testable, context: &Context) -> CheckFnResult {
 }
 
 fn is_blank_glyph(f: &TestFont, gid: GlyphId) -> Result<bool, CheckError> {
-    let mut pen = AnythingPen::default();
+    let mut pen = HasInkPen::default();
     f.draw_glyph(gid, &mut pen, DEFAULT_LOCATION)?;
-    Ok(!pen.anything())
+    Ok(!pen.has_ink())
 }

@@ -94,36 +94,6 @@ impl OutlinePen for HasInkPen {
 }
 
 #[derive(Default)]
-/// A pen to determine if an outline has any contours
-pub struct AnythingPen {
-    /// Does the outline have anything?
-    anything: bool,
-}
-impl AnythingPen {
-    /// Create a new AnythingPen
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Does the outline have anything?
-    pub fn anything(&self) -> bool {
-        self.anything
-    }
-}
-impl OutlinePen for AnythingPen {
-    fn move_to(&mut self, _x: f32, _y: f32) {}
-    fn line_to(&mut self, _x: f32, _y: f32) {
-        self.anything = true;
-    }
-    fn curve_to(&mut self, _x1: f32, _y1: f32, _x2: f32, _y2: f32, _x3: f32, _y3: f32) {
-        self.anything = true;
-    }
-    fn quad_to(&mut self, _cx0: f32, _cy0: f32, _x: f32, _y: f32) {
-        self.anything = true;
-    }
-    fn close(&mut self) {}
-}
-
-#[derive(Default)]
 /// A pen to count the number of contours in an outline
 pub struct ContourCountPen {
     /// The number of contours in the outline
