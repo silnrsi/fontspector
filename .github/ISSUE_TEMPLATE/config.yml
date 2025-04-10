@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: For anything else not listed above...
+    about: Ask a question in GitHub Discussions.
+    url: https://github.com/fonttools/fontspector/discussions
