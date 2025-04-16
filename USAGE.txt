@@ -1,0 +1,11 @@
+sudo apt install rustup gcc openssl-dev librust-openssl-sys-dev librust-protobuf-dev zlib1g-dev protobuf-compiler python3-dev
+
+rustup install stable
+
+git clone --remote-submodules https://github.com/simoncozens/fontspector.git 
+
+cd fontspector
+
+cargo install --path fontspector-cli --features python
+
+fontspector --use-python -p profiles/silfonts.toml ~/repos/wstechfonts/font-andika-mtihani/results/*.ttf -J 4 --full-lists --html results/fontspector-report.html &> log.txt
