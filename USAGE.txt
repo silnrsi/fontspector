@@ -1,11 +1,19 @@
-sudo apt install rustup gcc openssl-dev librust-openssl-sys-dev librust-protobuf-dev zlib1g-dev protobuf-compiler python3-dev
+sudo apt install rustup gcc librust-openssl-dev librust-openssl-sys-dev librust-protobuf-dev zlib1g-dev protobuf-compiler python3-dev
 
 rustup install stable
 
-git clone --remote-submodules https://github.com/simoncozens/fontspector.git 
+git clone --remote-submodules https://github.com/fonttools/fontspector.git 
 
 cd fontspector
 
+git submodule init
+git submodule update
+
 cargo install --path fontspector-cli --features python
 
-fontspector --use-python -p profiles/silfonts.toml ~/repos/wstechfonts/font-andika-mtihani/results/*.ttf -J 4 --full-lists --html results/fontspector-report.html &> log.txt
+fontspector --use-python -p profiles/silfonts.toml ~/repos/wstechfonts/font-andika-mtihani/results/*.ttf -J 4 --full-lists --html ~/repos/wstechfonts/font-andika-mtihani/results/fontspector-report.html &> log.txt
+
+
+inside our Smith CT (provided you copied the profile inside):
+
+fontspector --use-python -p /smith/silfonts.toml /smith/font-andika-mtihani/results/*.ttf -J 4 --full-lists --html /smith/font-andika-mtihani/results/fontspector-report.html &> log.txt
