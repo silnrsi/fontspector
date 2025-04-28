@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION};
-use skrifa::raw::TableProvider;
-use skrifa::{outline::OutlinePen, MetadataProvider};
+use serde_json::json;
+use skrifa::{outline::OutlinePen, raw::TableProvider, MetadataProvider};
 
 use super::close_but_not_on;
 const ALIGNMENT_MISS_EPSILON: i16 = 2; // Four point lee-way on alignment misses
@@ -12,19 +12,22 @@ struct AlignmentMissPen<'a> {
     is_uppercase: bool,
     alignments: &'a HashMap<String, i16>,
     epsilon: i16,
-    warnings: Vec<String>,
+    warnings: Vec<(String, f32, f32, String, f32)>,
 }
 
 impl AlignmentMissPen<'_> {
     fn update(&mut self, x: f32, y: f32) {
-        for (line, y_expected) in self.alignments {
+        for (line, &y_expected) in self.alignments {
             if line == "x-height" && self.is_uppercase {
                 continue;
             }
-            if close_but_not_on(*y_expected, y as i16, self.epsilon) {
-                self.warnings.push(format!(
-                    "{}: X={},Y={} (should be at {} {}?)",
-                    self.glyph_name, x, y, line, y_expected
+            if close_but_not_on(y_expected, y as i16, self.epsilon) {
+                self.warnings.push((
+                    self.glyph_name.to_string(),
+                    x,
+                    y,
+                    line.to_string(),
+                    y_expected.into(),
                 ));
             }
         }
@@ -118,13 +121,34 @@ fn alignment_miss(t: &Testable, context: &Context) -> CheckFnResult {
         }
     }
     if !all_warnings.is_empty() {
-        problems.push(Status::warn(
+        let mut warn = Status::warn(
             "found-misalignments",
             &format!(
                 "The following glyphs have on-curve points which have potentially incorrect y coordinates:\n\n{}",
-                bullet_list(context, all_warnings)
+                bullet_list(context, all_warnings.iter().map(|(glyph, x, y, line, y_expected)| {
+                    format!(
+                        "- {}: {} (x={:.2}, y={:.2}) is close to {} (y={:.2})",
+                        glyph, line, x, y, line, y_expected
+                    )
+                }))
             ),
-        ));
+        );
+        warn.metadata = Some(
+            all_warnings
+                .iter()
+                .map(|(glyph, x, y, line, y_expected)| {
+                    json!({
+                        "glyph": glyph,
+                        "x": x,
+                        "y": y,
+                        "line": line,
+                        "y_expected": y_expected
+                    })
+                })
+                .collect::<Vec<_>>()
+                .into(),
+        );
+        problems.push(warn);
     }
 
     return_result(problems)
