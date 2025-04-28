@@ -7,6 +7,22 @@ crypto.createHash = algorithm => crypto_orig_createHash(algorithm == "md4" ? "sh
 
 module.exports = {
   entry: "./bootstrap.js",
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      "path": false,
+      "fs": false,
+    }
+  },
   output: {
     path: path.resolve(__dirname, "..", "..", "docs"),
     filename: "bootstrap.js"
