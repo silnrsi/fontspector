@@ -3,6 +3,7 @@
   "scripts": {
     "build-microsoft": "cargo build --release && cargo-cp-artifact -a cdylib profile-microsoft  microsoft.fontspectorplugin -- cargo build -p profile-microsoft  --message-format=json-render-diagnostics --release",
     "build-adobe": "cargo build --release && cargo-cp-artifact -a cdylib profile-adobe  adobe.fontspectorplugin -- cargo build -p profile-adobe  --message-format=json-render-diagnostics --release",
+    "build-iso15008": "cargo build --release && cargo-cp-artifact -a cdylib profile-iso15008  iso15008.fontspectorplugin -- cargo build -p profile-iso15008  --message-format=json-render-diagnostics --release",
     "build-test": "cargo build --release && cargo-cp-artifact -a cdylib profile-testplugin  testplugin.fontspectorplugin -- cargo build -p profile-testplugin  --message-format=json-render-diagnostics --release"
   },
   "dependencies": {

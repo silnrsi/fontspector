@@ -193,7 +193,10 @@ function renderLog(log: Status, id: string, filename: string) {
   var extra_html = "";
   var suppress = false;
   if (log.metadata && id in CheckSpecificRendering) {
-    [extra_html, suppress] = CheckSpecificRendering[id](log.metadata, fonts[filename]);
+    [extra_html, suppress] = CheckSpecificRendering[id](
+      log.metadata,
+      fonts[filename]
+    );
     if (suppress) {
       return $(extra_html);
     }
@@ -216,6 +219,7 @@ const PROFILES: Record<string, string> = {
   opentype: "OpenType (standards compliance)",
   universal: "Universal (community best practices)",
   googlefonts: "Google Fonts",
+  iso15008: "ISO 15008 (in-car accessibility)",
   // adobefonts: "Adobe Fonts",
   // fontbureau: "Font Bureau",
   // typenetwork: "Type Network",
@@ -358,7 +362,7 @@ $(function () {
     );
     const fulllists = $("#full-lists").is(":checked");
     const loglevels = $("#loglevels").val();
-    var files: Record<string, Uint8Array> =  {};
+    var files: Record<string, Uint8Array> = {};
     for (var filename of Object.keys(fonts)) {
       files[filename] = fonts[filename].file;
     }

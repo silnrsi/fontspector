@@ -12,6 +12,7 @@ profile-opentype = { path = "../profile-opentype" }
 profile-universal = { path = "../profile-universal" }
 profile-googlefonts = { path = "../profile-googlefonts" }
 serde_json = { version = "1.0.96", features = ["preserve_order"] }
+profile-iso15008 = { version = "0.1.0", path = "../profile-iso15008" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
