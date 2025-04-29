@@ -1,7 +1,26 @@
-import Worker from "worker-loader!./webworker.js";
-const fbWorker = new Worker();
+const fbWorker = new Worker(new URL("./webworker.js", import.meta.url));
 
-const SORT_RESULT = {
+import $ from "jquery";
+import Dropzone from "dropzone";
+import "bootstrap";
+import { CheckSpecificRendering } from "./rendering";
+import {
+  FontInfo,
+  StatusCode,
+  ChecksMessage,
+  CheckResult,
+  Message,
+  Status,
+} from "./types";
+// @ts-ignore
+let hbjs = window["hbjs"];
+
+let fonts: Record<string, FontInfo> = {};
+
+declare var CmarkGFM: any;
+const tinysort = require("tinysort");
+
+const SORT_RESULT: Record<StatusCode, string> = {
   FAIL: "aa",
   WARN: "bb",
   INFO: "cc",
@@ -10,26 +29,18 @@ const SORT_RESULT = {
   SKIP: "zz",
 };
 
-const NOWASM = (s) => `
+const NOWASM = (s: string) => `
 This check cannot be run in the web environment. This is because ${s}.
 The web version of fontbakery is not a full replacement for the Python
 version, and we recommend that you install fontbakery and check your
 fonts locally to ensure that all checks are run.`;
-const CANT_COMPILE = (s) =>
+const CANT_COMPILE = (s: string) =>
   NOWASM(`the ${s} library cannot be compiled for WASM`);
 const NEEDS_NETWORK = NOWASM("it needs access to the network");
 const BABELFONT = NOWASM(
   "the check requires a library (babelfont) with a Rust dependency"
 );
-const EXCUSES = {
-  // Needs dependencies
-  freetype_rasterizer: CANT_COMPILE("Freetype"),
-  ots: CANT_COMPILE("OpenType Sanitizer"),
-  "alt_caron:googlefonts": BABELFONT,
-  alt_caron: BABELFONT,
-  arabic_high_hamza: BABELFONT,
-  arabic_spacing_symbols: BABELFONT,
-  legacy_accents: BABELFONT,
+const EXCUSES: Record<string, string> = {
   // Needs network
   "googlefonts/vendor_id": NEEDS_NETWORK,
   fontdata_namecheck: NEEDS_NETWORK,
@@ -43,16 +54,9 @@ const EXCUSES = {
   // Shaping checks
   "googlefonts/render_own_name": CANT_COMPILE("Freetype"),
   dotted_circle: CANT_COMPILE("cffsubr [required by ufo2ft]"),
-  "googlefonts/metadata/can_render_samples": CANT_COMPILE("Harfbuzz"),
-  "opentype/slant_direction": CANT_COMPILE("Harfbuzz"),
-  "googlefonts/glyphsets/shape_languages": CANT_COMPILE("Harfbuzz"),
-
   // Other checks
   "googlefonts/metadata/family_directory_name": NOWASM(
     "there are no directories in the WASM environment"
-  ),
-  ttx_roundtrip: NOWASM(
-    "the WASM environment does not support calling other processes"
   ),
 };
 
@@ -76,7 +80,7 @@ function reset() {
  * Used to display Python errors.
  * @param {string} msg - HTML error message
  */
-function showError(msg) {
+function showError(msg: string) {
   $("#errorModal").show();
   $("#errorText").html(msg);
 }
@@ -86,7 +90,7 @@ function showError(msg) {
  * Used to display Python errors.
  * @param {Map} data - All the stuff
  */
-function showResult(data) {
+function showResult(data: CheckResult[]) {
   console.log("Got a result", data);
   $("#startModal").hide();
   for (var result of data) {
@@ -96,7 +100,7 @@ function showResult(data) {
     console.log("Adding result for ", checkid);
     let worststatus = result.worst_status;
     $(`#${worststatus}-count`).html(
-      1 + parseInt($(`#${worststatus}-count`).html())
+      (1 + parseInt($(`#${worststatus}-count`).html())).toString()
     );
     if (thispill.length == 0) {
       // Add a new pill
@@ -175,17 +179,7 @@ function showResult(data) {
             </ul>
           </li>`);
         }
-        thistab.find(where).append(
-          $(`
-              <li>
-                <span
-                  class="bg-${log.severity} font-weight-bold">
-                  ${log.severity}
-                </span>:
-                <div>${CmarkGFM.convert(log.message || "")}</div>
-              </li>
-            `)
-        );
+        thistab.find(where).append(renderLog(log, checkid, result.filename));
       }
     }
   }
@@ -195,8 +189,30 @@ function showResult(data) {
   $("#v-pills-tab button").not(".disabled").first().tab("show");
 }
 
+function renderLog(log: Status, id: string, filename: string) {
+  var extra_html = "";
+  var suppress = false;
+  if (log.metadata && id in CheckSpecificRendering) {
+    [extra_html, suppress] = CheckSpecificRendering[id](log.metadata, fonts[filename]);
+    if (suppress) {
+      return $(extra_html);
+    }
+  }
+
+  return $(`
+    <li>
+      <span
+        class="bg-${log.severity} font-weight-bold">
+        ${log.severity}
+      </span>:
+      <div>${CmarkGFM.convert(log.message || "")}</div>
+      ${extra_html}
+    </li>
+  `);
+}
+
 /* Add a profile from the profiles list */
-const PROFILES = {
+const PROFILES: Record<string, string> = {
   opentype: "OpenType (standards compliance)",
   universal: "Universal (community best practices)",
   googlefonts: "Google Fonts",
@@ -207,7 +223,7 @@ const PROFILES = {
   // microsoft: "Microsoft",
 };
 
-function addProfile(profilename, col) {
+function addProfile(profilename: string, col: number) {
   const checked = profilename == "universal" ? "checked" : "";
   const widget = $(`
     <div class="form-check">
@@ -225,7 +241,7 @@ function addProfile(profilename, col) {
  *
  * @param {Map} checks: Metadata about the checks
  **/
-function listChecks(checks) {
+function listChecks(checks: [string, Map<string, any>][]) {
   $("#startModal").hide();
   $("#listchecks").show();
   $("#normalresults").hide();
@@ -282,33 +298,29 @@ function listChecks(checks) {
 }
 
 fbWorker.onmessage = (event) => {
-  console.log("Got a message", event.data);
-  if ("checks" in event.data) {
-    listChecks(event.data.checks);
+  let message = event.data as Message;
+  console.log("Got a message", message);
+  if ("checks" in message) {
+    listChecks((event.data as ChecksMessage).checks);
     return;
   }
-  if ("ready" in event.data) {
+  if ("ready" in message) {
     showLoaded();
     return;
   }
-  if ("version" in event.data) {
-    $("#fb-version").html(event.data.version);
+  if ("version" in message) {
+    $("#fb-version").html(message.version);
     return;
   }
-  if ("checks" in event.data) {
-    console.log(event.data);
-    return;
-  }
-  if ("error" in event.data) {
-    showError(event.data.error);
-    // otherwise data is a Map
+  if ("error" in message) {
+    showError(message.error);
   } else {
     $("#v-pills-tab button:first-child").tab("show");
-    showResult(event.data);
+    showResult(message as CheckResult[]);
   }
 };
 
-var files = {};
+Dropzone.autoDiscover = false;
 
 $(function () {
   console.log("Calling boot");
@@ -318,7 +330,17 @@ $(function () {
     accept: function (file, done) {
       const reader = new FileReader();
       reader.addEventListener("loadend", function (event) {
-        files[file.name] = new Uint8Array(event.target.result);
+        var filedata = new Uint8Array(event.target.result as ArrayBuffer);
+        var blob = hbjs.createBlob(filedata);
+        var face = hbjs.createFace(blob, 0);
+        var font = hbjs.createFont(face);
+        fonts[file.name] = {
+          name: file.name,
+          file: filedata,
+          blob,
+          face,
+          font,
+        };
       });
       reader.readAsArrayBuffer(file);
     },
@@ -336,6 +358,11 @@ $(function () {
     );
     const fulllists = $("#full-lists").is(":checked");
     const loglevels = $("#loglevels").val();
+    var files: Record<string, Uint8Array> =  {};
+    for (var filename of Object.keys(fonts)) {
+      files[filename] = fonts[filename].file;
+    }
+    console.log(files);
     fbWorker.postMessage({ profile, files, loglevels, fulllists });
   });
   $("#listchecksbtn").click(function () {
