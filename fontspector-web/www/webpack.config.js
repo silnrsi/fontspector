@@ -37,7 +37,8 @@ module.exports = {
         '*.css',
         '*.png',
         'cmark-gfm.js',
+        'node_modules/harfbuzzjs/hb.wasm',
        ]
     )
-  ],
+  ]
 };
