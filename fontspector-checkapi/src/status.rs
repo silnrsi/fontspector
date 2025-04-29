@@ -96,6 +96,9 @@ pub struct Status {
     /// A code to identify the status
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
+    /// Additional metadata provided to the reporter
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
 }
 
 impl std::fmt::Display for Status {
@@ -143,6 +146,7 @@ impl Status {
             message: None,
             code: None,
             severity: StatusCode::Pass,
+            metadata: None,
         }
     }
     /// Create a status with a fail severity
@@ -151,6 +155,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Fail,
+            metadata: None,
         }
     }
     /// Create a status with a warning severity
@@ -159,6 +164,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Warn,
+            metadata: None,
         }
     }
     /// Create a status with an info severity
@@ -167,6 +173,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Skip,
+            metadata: None,
         }
     }
     /// Create a status with an info severity
@@ -175,6 +182,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Info,
+            metadata: None,
         }
     }
     /// Create a status with an error severity
@@ -183,6 +191,7 @@ impl Status {
             message: Some(message.to_string()),
             code: code.map(|x| x.to_string()),
             severity: StatusCode::Error,
+            metadata: None,
         }
     }
 

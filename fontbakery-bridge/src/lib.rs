@@ -83,6 +83,7 @@ fn python_checkrunner_impl(
                 message: Some(message),
                 severity: status,
                 code,
+                metadata: None,
             });
         }
         Ok(return_result(messages))
