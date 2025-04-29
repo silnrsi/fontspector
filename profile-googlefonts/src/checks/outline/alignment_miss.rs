@@ -141,8 +141,8 @@ fn alignment_miss(t: &Testable, context: &Context) -> CheckFnResult {
                 "The following glyphs have on-curve points which have potentially incorrect y coordinates:\n\n{}",
                 bullet_list(context, all_warnings.iter().map(|warning| {
                     format!(
-                        "- {}: {} (x={:.2}, y={:.2}) is close to {} (y={:.2})",
-                        warning.glyph_name, warning.line, warning.x, warning.y, warning.line, warning.y_expected
+                        "- {}: X={},Y={} (should be at {} {}?)",
+                        warning.glyph_name, warning.x, warning.y, warning.line, warning.y_expected
                     )
                 }))
             ),
