@@ -1,31 +1,47 @@
 use std::collections::HashMap;
 
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, DEFAULT_LOCATION};
-use skrifa::raw::TableProvider;
-use skrifa::{outline::OutlinePen, MetadataProvider};
+use serde::Serialize;
+use serde_json::Value;
+use skrifa::{outline::OutlinePen, raw::TableProvider, GlyphId, MetadataProvider};
 
 use super::close_but_not_on;
 const ALIGNMENT_MISS_EPSILON: i16 = 2; // Four point lee-way on alignment misses
 
+#[derive(Serialize)]
+struct Warning {
+    glyph_name: String,
+    glyph_id: u32,
+    x: f32,
+    y: f32,
+    line: String,
+    y_expected: f32,
+}
+
 struct AlignmentMissPen<'a> {
+    glyph_id: GlyphId,
     glyph_name: &'a str,
     is_uppercase: bool,
     alignments: &'a HashMap<String, i16>,
     epsilon: i16,
-    warnings: Vec<String>,
+    warnings: Vec<Warning>,
 }
 
 impl AlignmentMissPen<'_> {
     fn update(&mut self, x: f32, y: f32) {
-        for (line, y_expected) in self.alignments {
+        for (line, &y_expected) in self.alignments {
             if line == "x-height" && self.is_uppercase {
                 continue;
             }
-            if close_but_not_on(*y_expected, y as i16, self.epsilon) {
-                self.warnings.push(format!(
-                    "{}: X={},Y={} (should be at {} {}?)",
-                    self.glyph_name, x, y, line, y_expected
-                ));
+            if close_but_not_on(y_expected, y as i16, self.epsilon) {
+                self.warnings.push(Warning {
+                    glyph_name: self.glyph_name.to_string(),
+                    x,
+                    y,
+                    line: line.to_string(),
+                    y_expected: y_expected.into(),
+                    glyph_id: self.glyph_id.to_u32(),
+                });
             }
         }
     }
@@ -106,6 +122,7 @@ fn alignment_miss(t: &Testable, context: &Context) -> CheckFnResult {
             epsilon: ALIGNMENT_MISS_EPSILON,
             warnings: vec![],
             glyph_name: &name,
+            glyph_id: glyph,
         };
         f.draw_glyph(glyph, &mut pen, DEFAULT_LOCATION)?;
         all_warnings.extend(pen.warnings);
@@ -118,13 +135,29 @@ fn alignment_miss(t: &Testable, context: &Context) -> CheckFnResult {
         }
     }
     if !all_warnings.is_empty() {
-        problems.push(Status::warn(
+        let mut warn = Status::warn(
             "found-misalignments",
             &format!(
                 "The following glyphs have on-curve points which have potentially incorrect y coordinates:\n\n{}",
-                bullet_list(context, all_warnings)
+                bullet_list(context, all_warnings.iter().map(|warning| {
+                    format!(
+                        "- {}: X={},Y={} (should be at {} {}?)",
+                        warning.glyph_name, warning.x, warning.y, warning.line, warning.y_expected
+                    )
+                }))
             ),
-        ));
+        );
+        warn.metadata = Some(
+            all_warnings
+                .iter()
+                .map(|warning| {
+                    #[allow(clippy::unwrap_used)] // How can it go wrong?
+                    serde_json::to_value(warning).unwrap()
+                })
+                .collect::<Vec<Value>>()
+                .into(),
+        );
+        problems.push(warn);
     }
 
     return_result(problems)

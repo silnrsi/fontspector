@@ -21,6 +21,7 @@ fontspector-checkapi = { path = "../fontspector-checkapi", features = ["clap"] }
 fontbakery-bridge = { path = "../fontbakery-bridge", optional = true }
 profile-universal = { path = "../profile-universal" }
 profile-opentype = { path = "../profile-opentype" }
+profile-iso15008 = { path = "../profile-iso15008" }
 profile-googlefonts = { path = "../profile-googlefonts" }
 clap = { version = "4", features = ["derive"] }
 itertools = { workspace = true }

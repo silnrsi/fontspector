@@ -98,7 +98,7 @@ fn case_mapping(t: &Testable, context: &Context) -> CheckFnResult {
         Ok(Status::just_one_fail(
             "missing-case-counterparts",
             &format!(
-                "The following glyphs are missing case-swapping counterparts:\n{}",
+                "The following glyphs are missing case-swapping counterparts:\n\n{}",
                 table.as_markdown().map_err(|_| CheckError::Error(
                     "Can't happen (table creation failed)".to_string()
                 ))?

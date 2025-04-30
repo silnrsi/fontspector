@@ -23,6 +23,7 @@ use fontspector_checkapi::{
 };
 use itertools::Either;
 use profile_googlefonts::GoogleFonts;
+use profile_iso15008::Iso15008;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
 use reporters::{process_reporter_args, terminal::TerminalReporter, Reporter, RunResults};
@@ -93,6 +94,12 @@ fn main() {
     GoogleFonts
         .register(&mut registry)
         .expect("Couldn't register googlefonts profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Iso15008
+        .register(&mut registry)
+        .expect("Couldn't register iso15008 profile, fontspector bug");
+
     for plugin_path in args.plugins.iter() {
         if let Err(err) = registry.load_plugin(plugin_path) {
             log::error!("Could not load plugin {:}: {:}", plugin_path, err);

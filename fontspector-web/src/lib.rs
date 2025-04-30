@@ -5,6 +5,7 @@ use fontspector_checkapi::{
     Check, CheckResult, Context, Plugin, Registry, Testable, TestableCollection, TestableType,
 };
 use profile_googlefonts::GoogleFonts;
+use profile_iso15008::Iso15008;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
 
@@ -27,6 +28,9 @@ pub fn check_fonts(fonts: &JsValue, profile: &str) -> Result<String, JsValue> {
     GoogleFonts
         .register(&mut registry)
         .expect("Couldn't register googlefonts profile, fontspector bug");
+    Iso15008
+        .register(&mut registry)
+        .expect("Couldn't register iso15008 profile, fontspector bug");
     let testables: Vec<Testable> = Reflect::own_keys(fonts)?
         .into_iter()
         .map(|filename| {
