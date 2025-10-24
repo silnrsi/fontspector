@@ -1,8 +1,7 @@
 [package]
 name = "fontspector-profile-microsoft"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
-publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -10,17 +9,16 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = [
     "kurbo",
-] }
+], version = "1.0.0" }
 fontations = { workspace = true }
 regex = { workspace = true }
-rustybuzz = { workspace = true }
-
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-# Plugin architecture
-pluginator = { workspace = true }
 
 # For tnum shaping
 rustybuzz = "0.20.1"
 
 [lints]
 workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+# Plugin architecture
+pluginator = { workspace = true }

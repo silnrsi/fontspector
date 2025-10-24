@@ -7,6 +7,8 @@ use profile_googlefonts::GoogleFonts;
 use profile_iso15008::Iso15008;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
+use profile_microsoft::Microsoft;
+use profile_adobe::Adobe;
 use std::io::Read;
 use std::path::PathBuf;
 
@@ -91,6 +93,16 @@ pub(crate) fn register_core_profiles(args: &Args, registry: &mut Registry<'stati
     Fontwerk
         .register(registry)
         .expect("Couldn't register fontwerk profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Microsoft
+        .register(registry)
+        .expect("Couldn't register microsoft profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Adobe
+        .register(registry)
+        .expect("Couldn't register adobefonts profile, fontspector bug");
 }
 
 #[cfg(feature = "python")]

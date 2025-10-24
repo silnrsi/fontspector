@@ -18,7 +18,7 @@ fontc = ["dep:fontc"]
 
 [build-dependencies]
 walkdir = "2.5"
-zip = "4"
+zip = "6"
 quote = "1.0"
 shadow-rs = "1.1.1"
 
@@ -33,6 +33,8 @@ profile-fontwerk = { path = "../profile-fontwerk", version = "1.0.0", package = 
 profile-opentype = { path = "../profile-opentype", version = "1.0.0", package = "fontspector-profile-opentype" }
 profile-iso15008 = { path = "../profile-iso15008", version = "1.0.0", package = "fontspector-profile-iso15008" }
 profile-googlefonts = { path = "../profile-googlefonts", version = "1.0.0", package = "fontspector-profile-googlefonts" }
+profile-microsoft = { path = "../profile-microsoft", version = "1.0.0", package = "fontspector-profile-microsoft" }
+profile-adobe = { path = "../profile-adobe", version = "1.0.0", package = "fontspector-profile-adobe" }
 clap = { version = "4", features = ["derive", "string"] }
 itertools = { workspace = true }
 log = { workspace = true }
@@ -53,7 +55,7 @@ serde_json = { workspace = true }
 
 # Markdown/HTML reporters
 tera = { version = "1.20.0", default-features = false }
-zip = "4"
+zip = "6"
 
 # CSV reporter
 csv = "1.3.1"

@@ -2,7 +2,6 @@
 name = "fontspector-profile-adobe"
 version = "1.0.0"
 edition = "2021"
-publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -10,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = [
     "kurbo",
-] }
+], version = "1.0.0" }
 fontations = { workspace = true }
 itertools = { workspace = true }
 

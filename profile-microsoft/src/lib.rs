@@ -36,5 +36,3 @@ impl fontspector_checkapi::Plugin for Microsoft {
     }
 }
 
-#[cfg(not(target_family = "wasm"))]
-pluginator::plugin_implementation!(fontspector_checkapi::Plugin, Microsoft);
