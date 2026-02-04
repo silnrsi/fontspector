@@ -5,35 +5,136 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.2 (2026-02-04)
+
+### Test
+
+ - <csr-id-c8bc460e7ee09451e8cb86ce9463fcbea3703c86/> Port all remaining `required_table` tests to rust
+   * feat(universal): warn when variable font with vmtx lacks VVAR table
+   
+   Variable fonts that include a vmtx (vertical metrics) table should also
+   include a VVAR table.
+   
+   As noted by Behdad (at https://github.com/notofonts/noto-cjk/issues/307),
+   inclusion of the VVAR table speeds up processing of vertical typesetting
+   significantly with only a minor file size increase, even in cases where
+   there is no variation in the vertical metrics (vmtx) across the
+   designspace. Fonttools automatically adds this table if the vmtx table
+   exists, and it isn't on the exclude list, but other build systems do
+   not at present.
+   
+   (Closes #516)
+   
+   * test(universal): add Rust tests for VVAR table check
+   
+   Add unit tests for the missing-vvar warning in required_tables check:
+   - test_vvar_missing: variable font with vmtx but no VVAR triggers WARN
+     and message contains "vmtx"
+   - test_vvar_present: variable font with vmtx AND VVAR has no warning
+   
+   Add ShantellSans test font to resources/test/ for VVAR present case.
+   Remove equivalent Python tests in favor of Rust implementation.
+   
+   * test(universal): complete required_tables Python to Rust test port
+   
+   - Add remove_table and add_table helpers to codetesting.rs
+   - Port remaining Python tests for required_tables check
+   - Tests cover TrueType, CFF, and CFF2 fonts
+   - Tests validate required tables, optional tables detection, and VVAR check
+   - Remove Python test file since Rust tests are now complete
+   - Note: maxp removal test skipped as it causes TestFont initialization to fail
+   
+   * refactor(check-api): use skrifa/write-fonts for table manipulation helpers
+   
+   Replace raw byte manipulation in remove_table and add_table test helpers
+   with skrifa FontRef and write-fonts FontBuilder APIs. This reduces code
+   from ~110 lines each to ~15 lines while maintaining the same functionality.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 47 days passed between releases.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 1 unique issue was worked on: [#586](https://github.com/fonttools/fontspector/issues/586)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#586](https://github.com/fonttools/fontspector/issues/586)**
+    - Port all remaining `required_table` tests to rust ([`c8bc460`](https://github.com/fonttools/fontspector/commit/c8bc460e7ee09451e8cb86ce9463fcbea3703c86))
+</details>
+
+## v1.3.1 (2025-12-17)
+
+<csr-id-4befd6c88900e2e06c363a8a6b1cdfc9518e9c91/>
+
+### Chore
+
+ - <csr-id-4befd6c88900e2e06c363a8a6b1cdfc9518e9c91/> More from rustybuzz to harfrust
+   * chore: Move from rustybuzz to harfrust
+   
+   * test(googlefonts/shaping/forbidden): Move tests to Rust
+   
+   * test: Pass full config to tests
+   
+   * chore: Missing docstrings
+   
+   * chore: not my fail
+
+### Bug Fixes
+
+ - <csr-id-adc935eb2c6ef03e239cff57af2b2adc9344295d/> update rust crate scraper to 0.25.0
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 64 days passed between releases.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 2 unique issues were worked on: [#531](https://github.com/fonttools/fontspector/issues/531), [#551](https://github.com/fonttools/fontspector/issues/551)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#531](https://github.com/fonttools/fontspector/issues/531)**
+    - More from rustybuzz to harfrust ([`4befd6c`](https://github.com/fonttools/fontspector/commit/4befd6c88900e2e06c363a8a6b1cdfc9518e9c91))
+ * **[#551](https://github.com/fonttools/fontspector/issues/551)**
+    - Update rust crate scraper to 0.25.0 ([`adc935e`](https://github.com/fonttools/fontspector/commit/adc935eb2c6ef03e239cff57af2b2adc9344295d))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.3.1, fontspector-profile-fontwerk v1.2.1, fontspector-profile-googlefonts v1.5.0, fontspector-profile-universal v1.4.0, fontspector v1.5.2 ([`2779526`](https://github.com/fonttools/fontspector/commit/2779526c00f235ea93e95882b4ebd2b41786c715))
+</details>
+
 ## v1.3.0 (2025-10-14)
+
+<csr-id-56e2f3f9167f15b2cb8cba8377403b8472514a7c/>
 
 ### New Features
 
  - <csr-id-008b6fa8eab5ed5e9bb9cff5a6d4e51f822ce0be/> Adding new check
    * feat(family/uniqueness_first_31_characters): Adding new check (#472)
-   
-   * fix: some typos
-   
-   * fix: some formatting and panic issues
-   
-   * refactor: moving get_name_entry_string and get_name_pel_codes to font.rs
-   
-   * refactor: rename get_name_pel_codes -> get_name_platform_tuples
-   
-   * refactor: get_name_platform_tuples (return set, not sorted list)
-   
-   * refactor: remove redundant first_31_char_collection.contains_key
-   
-   * refactor: add struct PlatformSelector
-   
-   * refactor(family_uniqueness_first_31_characters): unittest
+* fix: some typos
+* fix: some formatting and panic issues
+* refactor: moving get_name_entry_string and get_name_pel_codes to font.rs
+* refactor: rename get_name_pel_codes -> get_name_platform_tuples
+* refactor: get_name_platform_tuples (return set, not sorted list)
+* refactor: remove redundant first_31_char_collection.contains_key
+* refactor: add struct PlatformSelector
+* refactor(family_uniqueness_first_31_characters): unittest
 
 ### Bug Fixes
 
  - <csr-id-7a7f2a6fe346597071b8099a481023b24afa094d/> Don't check for whitespace ink in format characters
    * fix(whitespace_ink): Don't check for whitespace ink in format characters
-   
-   * chore: Update Cargo.lock
+* chore: Update Cargo.lock
 
 ### Test
 
@@ -43,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release over the course of 8 calendar days.
+ - 4 commits contributed to the release over the course of 8 calendar days.
  - 29 days passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 4 unique issues were worked on: [#472](https://github.com/fonttools/fontspector/issues/472), [#473](https://github.com/fonttools/fontspector/issues/473), [#478](https://github.com/fonttools/fontspector/issues/478), [#486](https://github.com/fonttools/fontspector/issues/486)
@@ -62,6 +163,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Allow testing of collections ([`56e2f3f`](https://github.com/fonttools/fontspector/commit/56e2f3f9167f15b2cb8cba8377403b8472514a7c))
  * **[#486](https://github.com/fonttools/fontspector/issues/486)**
     - Don't check for whitespace ink in format characters ([`7a7f2a6`](https://github.com/fonttools/fontspector/commit/7a7f2a6fe346597071b8099a481023b24afa094d))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.3.0, fontspector-profile-googlefonts v1.4.1, fontspector-profile-universal v1.3.0, fontspector v1.5.1 ([`7b3d29e`](https://github.com/fonttools/fontspector/commit/7b3d29e9dab0c4bf11506345219e59b378291be2))
 </details>
 
 ## v1.2.0 (2025-09-15)

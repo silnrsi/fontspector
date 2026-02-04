@@ -1,17 +1,25 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
 
 // No bad thing if we panic in tests
 use crate::{prelude::*, Check, CheckResult, Context, FileTypeConvert, StatusCode};
-use fontations::skrifa::raw::{types::NameId, TableProvider};
-use fontations::skrifa::{GlyphNames, MetadataProvider};
-use fontations::write::tables::cmap::Cmap;
-use fontations::write::{
-    tables::name::{Name, NameRecord},
-    FontBuilder,
+use fontations::{
+    skrifa::{
+        raw::{types::NameId, TableProvider},
+        GlyphNames, MetadataProvider,
+    },
+    write::{
+        tables::{
+            cmap::Cmap,
+            name::{Name, NameRecord},
+        },
+        FontBuilder,
+    },
 };
 
 /// The root of the workspace, used to locate test resources
@@ -57,19 +65,10 @@ pub fn run_check_with_config(
     things: TestableType<'_>,
     config: HashMap<String, serde_json::Value>,
 ) -> Option<CheckResult> {
-    let mut configuration = HashMap::new();
-    let mut check_config = serde_json::Map::new();
-    for (k, v) in config {
-        check_config.insert(k, v);
-    }
-    configuration.insert(
-        check.id.to_string(),
-        serde_json::Value::Object(check_config),
-    );
     let ctx: Context = Context {
         skip_network: false,
         network_timeout: Some(10),
-        configuration,
+        configuration: config,
         check_metadata: check.metadata(),
         full_lists: true,
         cache: Default::default(),
@@ -243,4 +242,53 @@ pub fn remap_glyph(
 
     font.contents = new_bytes;
     Ok(())
+}
+
+/// Remove a table from a font (for testing purposes only)
+///
+/// This rebuilds the font without the specified table using write-fonts FontBuilder.
+pub fn remove_table(font: &mut Testable, table_tag: &[u8; 4]) {
+    use fontations::skrifa::{font::FontRef, Tag};
+
+    let f = FontRef::new(&font.contents).unwrap();
+    let tag_to_remove = Tag::new(table_tag);
+
+    let mut builder = FontBuilder::new();
+    for table_record in f.table_directory.table_records() {
+        let tag = table_record.tag.get();
+        if tag != tag_to_remove {
+            if let Some(table_data) = f.table_data(tag) {
+                builder.add_raw(tag, table_data);
+            }
+        }
+    }
+
+    font.contents = builder.build();
+}
+
+/// Add a dummy table to a font (for testing purposes only)
+///
+/// This adds a table with minimal dummy data using write-fonts FontBuilder.
+/// The table won't be valid but will be detected by has_table().
+pub fn add_table(font: &mut Testable, table_tag: &[u8; 4]) {
+    use fontations::skrifa::{font::FontRef, Tag};
+
+    let f = FontRef::new(&font.contents).unwrap();
+    let new_tag = Tag::new(table_tag);
+
+    let mut builder = FontBuilder::new();
+
+    // Copy all existing tables
+    for table_record in f.table_directory.table_records() {
+        let tag = table_record.tag.get();
+        if let Some(table_data) = f.table_data(tag) {
+            builder.add_raw(tag, table_data);
+        }
+    }
+
+    // Add the new dummy table (4 bytes of zeros)
+    let dummy_data: &[u8] = &[0u8; 4];
+    builder.add_raw(new_tag, dummy_data);
+
+    font.contents = builder.build();
 }

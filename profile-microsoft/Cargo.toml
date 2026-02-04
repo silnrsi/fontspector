@@ -12,6 +12,7 @@ fontspector-checkapi = { path = "../fontspector-checkapi", features = [
 ], version = "1.0.0" }
 fontations = { workspace = true }
 regex = { workspace = true }
+harfrust = { workspace = true }
 
 # For tnum shaping
 rustybuzz = "0.20.1"

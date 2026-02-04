@@ -1,6 +1,6 @@
 [package]
 name = "fontspector-checkapi"
-version = "1.3.0"
+version = "1.3.2"
 edition = "2021"
 description = "Library for developing checks for the fontspector font QA tool"
 license = "MIT OR Apache-2.0"
@@ -15,7 +15,7 @@ python = []
 
 [build-dependencies]
 minreq = { version = "2.6.0", features = ["https"] }
-scraper = "0.24.0"
+scraper = "0.25.0"
 regex = { workspace = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]

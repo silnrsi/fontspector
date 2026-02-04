@@ -304,16 +304,36 @@ fn group_inputs(args: &mut Args) -> Vec<TestableCollection> {
     #[allow(clippy::indexing_slicing)] // We know this is a single file
     if args.inputs.len() == 1
         && (args.inputs[0].ends_with(".glyphs")
-            || args.inputs[0].ends_with(".designspace")
-            || args.inputs[0].ends_with(".ufo")
+            // || args.inputs[0].ends_with(".designspace")
+            // || args.inputs[0].ends_with(".ufo")
             || args.inputs[0].ends_with(".glyphspackage"))
     {
         let path = PathBuf::from(&args.inputs[0]);
         if let Ok(input) = fontc::Input::new(&path) {
+            use fontc::Input;
+
             log::info!("Compiling {}", &path.display());
             let flags = fontc::Flags::default();
+            #[allow(clippy::expect_used)] // You are on your own
+            let source = match input {
+                // Input::DesignSpacePath(path) => Ok(Box::new(DesignSpaceIrSource::new(path)?)),
+                Input::GlyphsPath(path) => {
+                    use fontir::source::Source as _;
+
+                    Ok(Box::new(
+                        glyphs2fontir::source::GlyphsIrSource::new(&path)
+                            .expect("Could not create GlyphsIrSource from Glyphs file"),
+                    ))
+                }
+                // Input::FontraPath(path) => Ok(Box::new(FontraIrSource::new(path)?)),
+                _ => Err(format!(
+                    "Input file {} has unsupported format for compilation",
+                    path.display()
+                )),
+            }
+            .expect("Could not create fontir source from input file");
             match fontc::generate_font(
-                &input,
+                source,
                 &PathBuf::from("build/"),
                 Some(&PathBuf::from("font.ttf")),
                 flags,
@@ -388,12 +408,14 @@ fn try_fixing_stuff(results: &mut RunResults, args: &Args, registry: &Registry) 
             );
             continue;
         };
-        if args.hotfix && result.filename.is_some() && check.hotfix.is_some() {
-            #[allow(clippy::unwrap_used)] // We know this is Some
-            fix_binaries
-                .entry(result.filename.clone().unwrap())
-                .or_default()
-                .push((check.id.to_string(), check.hotfix.unwrap(), result));
+        if let (Some(hotfix), Some(filename)) = (check.hotfix, result.filename.as_ref()) {
+            if args.hotfix {
+                fix_binaries.entry(filename.clone()).or_default().push((
+                    check.id.to_string(),
+                    hotfix,
+                    result,
+                ));
+            }
         }
     }
 
