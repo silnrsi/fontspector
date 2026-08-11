@@ -1758,7 +1758,7 @@ dependencies = [
 
 [[package]]
 name = "fontspector-profile-googlefonts"
-version = "1.8.3"
+version = "1.8.4"
 dependencies = [
  "chrono",
  "edit-distance",
