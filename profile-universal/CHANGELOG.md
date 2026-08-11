@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.8.4 (2026-08-11)
+
+### Chore
+
+ - <csr-id-ba4aa4052252bc103ba0742bea043c75d3f25265/> Thanks clippy
+
+### Bug Fixes
+
+ - <csr-id-ce4d7b63623f4ccd076dcea4888fefda55971793/> use gvar/HVAR peaks in suspicious_sidebearings
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release over the course of 21 calendar days.
+ - 35 days passed between releases.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 2 unique issues were worked on: [#875](https://github.com/fonttools/fontspector/issues/875), [#880](https://github.com/fonttools/fontspector/issues/880)
+
+### Thanks Clippy
+
+<csr-read-only-do-not-edit/>
+
+[Clippy](https://github.com/rust-lang/rust-clippy) helped 1 time to make code idiomatic. 
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#875](https://github.com/fonttools/fontspector/issues/875)**
+    - Thanks clippy ([`ba4aa40`](https://github.com/fonttools/fontspector/commit/ba4aa4052252bc103ba0742bea043c75d3f25265))
+ * **[#880](https://github.com/fonttools/fontspector/issues/880)**
+    - Use gvar/HVAR peaks in suspicious_sidebearings ([`ce4d7b6`](https://github.com/fonttools/fontspector/commit/ce4d7b63623f4ccd076dcea4888fefda55971793))
+</details>
+
 ## v1.8.3 (2026-07-07)
 
 ### Bug Fixes
@@ -25,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 2 commits contributed to the release.
+ - 3 commits contributed to the release.
  - 11 days passed between releases.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 2 unique issues were worked on: [#846](https://github.com/fonttools/fontspector/issues/846), [#857](https://github.com/fonttools/fontspector/issues/857)
@@ -40,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Wrong message, must be name ID 17 and not 16. ([`4a76eb1`](https://github.com/fonttools/fontspector/commit/4a76eb131b22c7f45456fcfed56280b66646046c))
  * **[#857](https://github.com/fonttools/fontspector/issues/857)**
     - Fallback to name ID 1 when 16 is absent ([`b6bc656`](https://github.com/fonttools/fontspector/commit/b6bc6561e19bca3cef1652489c3111ac8641be02))
+ * **Uncategorized**
+    - Release fontspector-profile-universal v1.8.3 ([`fafdc24`](https://github.com/fonttools/fontspector/commit/fafdc2441361ea9e346f86194b8a3c892718d91e))
 </details>
 
 ## v1.8.2 (2026-06-26)
@@ -53,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-read-only-do-not-edit/>
 
  - 2 commits contributed to the release.
+ - 30 days passed between releases.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 1 unique issue was worked on: [#825](https://github.com/fonttools/fontspector/issues/825)
 
@@ -79,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-read-only-do-not-edit/>
 
  - 2 commits contributed to the release.
+ - 9 days passed between releases.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 1 unique issue was worked on: [#803](https://github.com/fonttools/fontspector/issues/803)
 
@@ -101,10 +142,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-id-1d7ae179aa03daa7830b791dd3cbe17bcd179112/>
 <csr-id-ae1f30c4751e7f76ee903ab072761af580ece7ca/>
 <csr-id-4e585b258f40165222b17804675635f31c0783ee/>
-
-### Chore
-
- - <csr-id-0d19fe268f4ca901c88f68cef20b7426b981029a/> Silence printlns
 
 ### New Features
 
@@ -200,46 +237,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
    * chore: cargo fmt
 
-### Refactor
-
- - <csr-id-7b32eca0846e594655f304250928295ffbf6496a/> New plugin architecture
-   * refactor: Remove fontbakery-bridge
-   
-   * refactor: New plugin architecture
-   
-   * feat: Demonstrate Python-based plugins
-   
-   * docs: New plugin architecture
- - <csr-id-1d7ae179aa03daa7830b791dd3cbe17bcd179112/> merge zero_width_chars into base_has_width check
-   * feat(universal): add zero_width_chars check
-   
-   Warn when characters like U+FEFF ZERO WIDTH NO-BREAK SPACE, U+200B
-   ZERO WIDTH SPACE, U+200C ZWNJ, U+200D ZWJ, U+2060 WORD JOINER, and
-   U+FFFE have non-zero advance width in the hmtx table.
-
-### Test
-
- - <csr-id-ae1f30c4751e7f76ee903ab072761af580ece7ca/> port Python tests to Rust (batch 3+4: universal, varfont, googlefonts)
-   * test: port googlefonts Python tests to Rust (batch 4)
-   
-   Port 26 Python test functions to Rust across 27 check files.
-   74 new Rust test functions added, covering checks for:
-   canonical_filename, color_fonts, description (eof_linebreak, git_url,
-   has_unsupported_elements, min_length, urls, valid_html), fstype, gasp,
-   has_ttfautohint_params, meta/script_lang_tags, name (description_max_length,
-   family_name_compliance, familyname_first_char, line_breaks, mandatory_entries,
-   rfn, version_format), render_own_name, unitsperem, use_typo_metrics,
-   varfont/has_HVAR, vendor_id, weightclass, axisregistry/fvar_axis_defaults.
-   
-   All 126 tests pass. Deleted 26 corresponding Python test functions.
- - <csr-id-4e585b258f40165222b17804675635f31c0783ee/> port Python tests to Rust (batch 1)
-   * test: port Python tests to Rust (batch 1: cjk, empty_letters, nested_components, smallcaps, unwanted_tables)
-   
-   Port test_checks_cjk.py, test_checks_empty_letters.py, test_checks_glyf.py,
-   test_checks_smallcaps_before_ligatures.py, test_checks_unwanted_aat_tables.py,
-   and test_checks_unwanted_tables.py to Rust #[cfg(test)] modules in their
-   respective check files.
-
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
@@ -320,7 +317,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-read-only-do-not-edit/>
 
  - 3 commits contributed to the release over the course of 3 calendar days.
- - 16 days passed between releases.
+ - 17 days passed between releases.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 2 unique issues were worked on: [#628](https://github.com/fonttools/fontspector/issues/628), [#629](https://github.com/fonttools/fontspector/issues/629)
 
@@ -343,10 +340,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-id-19b91cdf15a6d8ea7e60b616199d28e03c76ba4d/>
 <csr-id-275df045d7ee4ba95e8183c48982201531dad633/>
 
-### Chore
-
- - <csr-id-19b91cdf15a6d8ea7e60b616199d28e03c76ba4d/> Reformat
-
 ### New Features
 
 <csr-id-5ee341e08c41001139a7914f346bfe70a875cc3a/>
@@ -354,15 +347,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-04a449bd24ff2519f5c0300cd013ffcdbf363bf7/> Add check (implements #557)
    * chore(checkapi): Add fontdrasil and axes function
 * feat(suspicious_sidebearings): Add check (implements #557)
-
-### Refactor
-
- - <csr-id-275df045d7ee4ba95e8183c48982201531dad633/> check for double spaces
-   * refactor(name/trailing_spaces): check for double spaces
-   
-   * refactor: format, make lint happy
-   
-   ---------
 
 ### Commit Statistics
 
@@ -405,68 +389,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      and message contains "vmtx"
 - test_vvar_present: variable font with vmtx AND VVAR has no warning
 
-### Refactor
-
- - <csr-id-905b344c2702bc78927fd7407978959c32dabbfe/> add context and improve report
-   * refactor(family_and_style_max_length): add info '({} characters too long)'
-   
-   * refactor(required_name_ids): removing leftover print
-   
-   * refactor(family_and_style_max_length): adding unittest + context
-   
-   * refactor(family_and_style_max_length): add missing context "INSTANCE_NAME"
-   
-   ---------
-
-### Test
-
- - <csr-id-c8bc460e7ee09451e8cb86ce9463fcbea3703c86/> Port all remaining `required_table` tests to rust
-   * feat(universal): warn when variable font with vmtx lacks VVAR table
-   
-   Variable fonts that include a vmtx (vertical metrics) table should also
-   include a VVAR table.
-   
-   As noted by Behdad (at https://github.com/notofonts/noto-cjk/issues/307),
-   inclusion of the VVAR table speeds up processing of vertical typesetting
-   significantly with only a minor file size increase, even in cases where
-   there is no variation in the vertical metrics (vmtx) across the
-   designspace. Fonttools automatically adds this table if the vmtx table
-   exists, and it isn't on the exclude list, but other build systems do
-   not at present.
-   
-   (Closes #516)
-   
-   * test(universal): add Rust tests for VVAR table check
-   
-   Add unit tests for the missing-vvar warning in required_tables check:
-   - test_vvar_missing: variable font with vmtx but no VVAR triggers WARN
-     and message contains "vmtx"
-   - test_vvar_present: variable font with vmtx AND VVAR has no warning
-   
-   Add ShantellSans test font to resources/test/ for VVAR present case.
-   Remove equivalent Python tests in favor of Rust implementation.
-   
-   * test(universal): complete required_tables Python to Rust test port
-   
-   - Add remove_table and add_table helpers to codetesting.rs
-   - Port remaining Python tests for required_tables check
-   - Tests cover TrueType, CFF, and CFF2 fonts
-   - Tests validate required tables, optional tables detection, and VVAR check
-   - Remove Python test file since Rust tests are now complete
-   - Note: maxp removal test skipped as it causes TestFont initialization to fail
-   
-   * refactor(check-api): use skrifa/write-fonts for table manipulation helpers
-   
-   Replace raw byte manipulation in remove_table and add_table test helpers
-   with skrifa FontRef and write-fonts FontBuilder APIs. This reduces code
-   from ~110 lines each to ~15 lines while maintaining the same functionality.
-
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
 
  - 4 commits contributed to the release over the course of 25 calendar days.
- - 48 days passed between releases.
+ - 49 days passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 3 unique issues were worked on: [#566](https://github.com/fonttools/fontspector/issues/566), [#585](https://github.com/fonttools/fontspector/issues/585), [#586](https://github.com/fonttools/fontspector/issues/586)
 
@@ -491,24 +419,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-id-3aff895fb75d510fa826e19339424347b5d3ff61/>
 <csr-id-fe45168dca4d0764eb65dfddb75b2a8013bd6326/>
 <csr-id-4befd6c88900e2e06c363a8a6b1cdfc9518e9c91/>
-
-### Chore
-
- - <csr-id-3aff895fb75d510fa826e19339424347b5d3ff61/> Refresh dependencies
-   * chore: Refresh dependencies
-   
-   * chore: Fixup fontc API
- - <csr-id-fe45168dca4d0764eb65dfddb75b2a8013bd6326/> Not my fail
- - <csr-id-4befd6c88900e2e06c363a8a6b1cdfc9518e9c91/> More from rustybuzz to harfrust
-   * chore: Move from rustybuzz to harfrust
-   
-   * test(googlefonts/shaping/forbidden): Move tests to Rust
-   
-   * test: Pass full config to tests
-   
-   * chore: Missing docstrings
-   
-   * chore: not my fail
 
 ### New Features
 
@@ -586,10 +496,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * fix(hinting_impact): We can now dehint glyf tables
 * chore: Change Rust CI workflow
 
-### Test
-
- - <csr-id-56e2f3f9167f15b2cb8cba8377403b8472514a7c/> Allow testing of collections
-
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
@@ -627,15 +533,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-id-90205a8089d1394f957cdf13cdcc461b73824425/>
 <csr-id-abd4d4cf426666d0dac52706a763fb01d0e85d2c/>
 
-### Chore
-
- - <csr-id-0c6365a1d3383dad9d12de3984989ee5747b35cf/> get working again
-   * chore: Upgrade fontations deps
-   
-   * chore: API changed
-   
-   * chore: Comply with new elided lifetime rules
-
 ### New Features
 
 <csr-id-fe2405db54f4da13ae03673150e91163f4f6d889/>
@@ -658,40 +555,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-1fd17e6a7e44c5d31bf560d02c6cf846f4fc59b3/> Rebuild desired glyph data, fixes #284
  - <csr-id-0c50d3bf0c259394384857c2908b59f5da279170/> Only run check on hinted fonts, fixes #347
 
-### Other
-
- - <csr-id-90205a8089d1394f957cdf13cdcc461b73824425/> fontspector-checkapi v1.1.2, fontspector-fontbakery-bridge v1.2.0, fontspector-profile-fontwerk v1.1.0, fontspector-profile-googlefonts v1.3.0, fontspector-profile-opentype v1.2.1, fontspector-profile-universal v1.1.2, fontspector v1.4.0
-
-### Test
-
- - <csr-id-abd4d4cf426666d0dac52706a763fb01d0e85d2c/> Move the tests from Python to Rust
-   * chore(codetesting): Improve codetesting story slightly
-   
-   * test(contour_count): WIP move test to Rust
-   
-   * chore: Helper function for check testing
-   
-   * test: Move many tests to Rust, by some strange magic
-   
-   * test: add test files
-   
-   * chore: Helper function for check testing with parameters
-   
-   * test: Move many more tests to Rust, thanks to my little electronic friend
-   
-   * chore: Change test helper functions to take references
-   
-   * test: Two more tests to Rust
-   
-   * chore: Fix up warnings
-   
-   * test: Four more tests to Rust
-
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
 
  - 11 commits contributed to the release over the course of 59 calendar days.
+ - 75 days passed between releases.
  - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 9 unique issues were worked on: [#348](https://github.com/fonttools/fontspector/issues/348), [#349](https://github.com/fonttools/fontspector/issues/349), [#357](https://github.com/fonttools/fontspector/issues/357), [#371](https://github.com/fonttools/fontspector/issues/371), [#405](https://github.com/fonttools/fontspector/issues/405), [#407](https://github.com/fonttools/fontspector/issues/407), [#409](https://github.com/fonttools/fontspector/issues/409), [#417](https://github.com/fonttools/fontspector/issues/417), [#418](https://github.com/fonttools/fontspector/issues/418)
 
@@ -748,32 +617,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-id-138edbbfba88008d71d9247eccbdfc017fef8b81/>
 <csr-id-a6b7ffc4f39c6b1c1bd92cd9b07f4ba22d54ef2e/>
 
-### Chore
-
- - <csr-id-138edbbfba88008d71d9247eccbdfc017fef8b81/> Update fontations dependencies
-   * chore: Update fontations dependencies
-   
-   * test(italic_angle): Update bounds check
-
 ### Bug Fixes
 
  - <csr-id-46e90e51624979590af83272f96cbcfc521b7d0a/> Improve rationale rewrapping
    * fix(cli): Improve rationale rewrapping
 * chore: Style fixes for new clippy
 
-### Style
-
- - <csr-id-a6b7ffc4f39c6b1c1bd92cd9b07f4ba22d54ef2e/> deny indexing slicing
-   * chore: More lints into Cargo.toml
-   
-   * style: Deny indexing slicing
-
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
 
  - 4 commits contributed to the release over the course of 11 calendar days.
- - 12 days passed between releases.
+ - 13 days passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 3 unique issues were worked on: [#287](https://github.com/fonttools/fontspector/issues/287), [#291](https://github.com/fonttools/fontspector/issues/291), [#299](https://github.com/fonttools/fontspector/issues/299)
 
@@ -797,13 +652,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-id-f44be5515dcaea17b96b1df7a4b11407561d0c17/>
 
-### Chore
-
- - <csr-id-f44be5515dcaea17b96b1df7a4b11407561d0c17/> Improve error handling
-   * chore: Better error handling
-   
-   * chore: Better error handling for fix functions too
-
 ### New Features
 
  - <csr-id-ea5107c15304c96b035aab80551ce8ddb7e7e98b/> Add fix function
@@ -819,7 +667,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-read-only-do-not-edit/>
 
  - 5 commits contributed to the release over the course of 22 calendar days.
- - 30 days passed between releases.
+ - 31 days passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 3 unique issues were worked on: [#137](https://github.com/fonttools/fontspector/issues/137), [#275](https://github.com/fonttools/fontspector/issues/275), [#280](https://github.com/fonttools/fontspector/issues/280)
 
@@ -894,14 +742,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-id-7cc0e15f42ffbf1d512f2fa50d42fe12ba3aca44/>
 <csr-id-d7968d62b6271d79869a3ebf34c1d20365482c6c/>
-
-### Other
-
- - <csr-id-7cc0e15f42ffbf1d512f2fa50d42fe12ba3aca44/> move to Universal profile
-   Still needs to be ported, though.
-   
-   (https://github.com/fonttools/fontbakery/pull/4937)
- - <csr-id-d7968d62b6271d79869a3ebf34c1d20365482c6c/> sync with latest fontbakery
 
 ### Commit Statistics
 
