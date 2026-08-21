@@ -1,8 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{error::FontspectorError, Override};
+use crate::{error::FontspectorError, MoreInfoRequest, Override};
+
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Copy, Clone, Serialize, Deserialize, Hash)]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 #[serde(rename_all = "UPPERCASE")]
@@ -18,13 +20,15 @@ pub enum StatusCode {
     Warn,
     /// Fail: a problem materially affects the correctness of the font
     Fail,
-    /// Error: something went wrong
+    /// Fatal: a critical font defect that would break font-serving infrastructure
+    Fatal,
+    /// Error: something went wrong with the check itself
     ///
     /// An Error is when something which returns a `Result<>` gave us
-    /// an `Err`` - for example a file couldn't be found or couldn't be
+    /// an `Err` - for example a file couldn't be found or couldn't be
     /// parsed, even though we did our best to check for things. In
-    /// other words, it's something so bad there's no point continuing
-    /// with the check; it's equivalent to a Fontbakery FATAL.
+    /// other words, something went wrong with the check infrastructure,
+    /// not the font itself.
     Error,
 }
 
@@ -38,6 +42,7 @@ impl FromStr for StatusCode {
             "PASS" => Ok(StatusCode::Pass),
             "WARN" => Ok(StatusCode::Warn),
             "FAIL" => Ok(StatusCode::Fail),
+            "FATAL" => Ok(StatusCode::Fatal),
             "ERROR" => Ok(StatusCode::Error),
             _ => Err(()),
         }
@@ -56,6 +61,7 @@ impl StatusCode {
             StatusCode::Pass,
             StatusCode::Warn,
             StatusCode::Fail,
+            StatusCode::Fatal,
             StatusCode::Error,
         ]
         .into_iter()
@@ -75,13 +81,70 @@ impl std::fmt::Display for StatusCode {
             StatusCode::Pass => write!(f, "PASS"),
             StatusCode::Skip => write!(f, "SKIP"),
             StatusCode::Fail => write!(f, "FAIL"),
+            StatusCode::Fatal => write!(f, "FATAL"),
             StatusCode::Warn => write!(f, "WARN"),
             StatusCode::Info => write!(f, "INFO"),
             StatusCode::Error => write!(f, "ERROR"),
         }
     }
 }
-#[derive(Debug, Clone, Serialize)]
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Metadata about a check result, which can be used by the reporter to provide
+/// additional information about the check result. This is intended to make the
+/// results of checks machine readable, for display in font editors or other tools.
+pub enum Metadata {
+    /// A problem with a specific glyph.
+    GlyphProblem {
+        /// The name of the glyph
+        glyph_name: String,
+        /// The ID of the glyph
+        glyph_id: u32,
+        /// A specific location within the font's design space, in user-space coordinates.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        userspace_location: Option<HashMap<String, f32>>,
+        /// A specific location within the glyph's coordinate space.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        position: Option<(f32, f32)>,
+        /// The value that was found.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        actual: Option<serde_json::Value>,
+        /// The value that was expected.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        expected: Option<serde_json::Value>,
+        /// A description of the problem to show to the user.
+        message: String,
+    },
+    /// A problem with a specific OpenType table.
+    TableProblem {
+        /// The tag of the table
+        table_tag: String,
+        /// The field within the table which has the problem, if any.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        field_name: Option<String>,
+        /// The value of the field which has the problem, if any.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        actual: Option<serde_json::Value>,
+        /// The expected value of the field, if any.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        expected: Option<serde_json::Value>,
+        /// A description of the problem to show to the user.
+        message: String,
+    },
+    /// A problem which is not specific to a glyph or table.
+    FontProblem {
+        /// A description of the problem to show to the user.
+        message: String,
+        /// Additional context about the problem
+        #[serde(skip_serializing_if = "Option::is_none")]
+        context: Option<serde_json::Value>,
+    },
+    /// A message to the user that, to fix this problem, more information will need to be provided
+    FixNeedsMoreInformation(MoreInfoRequest),
+    /// A catch-all for other kinds of structured data.
+    Other(serde_json::Value),
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
 /// A status message from a check
 ///
 /// This is a subresult, in the sense that a check may return multiple failures
@@ -97,8 +160,8 @@ pub struct Status {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
     /// Additional metadata provided to the reporter
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub metadata: Vec<Metadata>,
 }
 
 impl std::fmt::Display for Status {
@@ -135,6 +198,11 @@ impl Status {
         Box::new(vec![Status::fail(code, message)].into_iter())
     }
 
+    /// Return a single fatal result from a check
+    pub fn just_one_fatal(code: &str, message: &str) -> Box<dyn Iterator<Item = Status>> {
+        Box::new(vec![Status::fatal(code, message)].into_iter())
+    }
+
     /// Return a single skip result from a check
     pub fn just_one_skip(code: &str, message: &str) -> Box<dyn Iterator<Item = Status>> {
         Box::new(vec![Status::skip(code, message)].into_iter())
@@ -146,7 +214,7 @@ impl Status {
             message: None,
             code: None,
             severity: StatusCode::Pass,
-            metadata: None,
+            metadata: Vec::new(),
         }
     }
     /// Create a status with a fail severity
@@ -155,7 +223,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Fail,
-            metadata: None,
+            metadata: Vec::new(),
         }
     }
     /// Create a status with a warning severity
@@ -164,7 +232,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Warn,
-            metadata: None,
+            metadata: Vec::new(),
         }
     }
     /// Create a status with an info severity
@@ -173,7 +241,7 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Skip,
-            metadata: None,
+            metadata: Vec::new(),
         }
     }
     /// Create a status with an info severity
@@ -182,7 +250,16 @@ impl Status {
             message: Some(message.to_string()),
             code: Some(code.to_string()),
             severity: StatusCode::Info,
-            metadata: None,
+            metadata: Vec::new(),
+        }
+    }
+    /// Create a status with a fatal severity
+    pub fn fatal(code: &str, message: &str) -> Self {
+        Self {
+            message: Some(message.to_string()),
+            code: Some(code.to_string()),
+            severity: StatusCode::Fatal,
+            metadata: Vec::new(),
         }
     }
     /// Create a status with an error severity
@@ -191,8 +268,14 @@ impl Status {
             message: Some(message.to_string()),
             code: code.map(|x| x.to_string()),
             severity: StatusCode::Error,
-            metadata: None,
+            metadata: Vec::new(),
         }
+    }
+
+    /// Append metadata to the status
+    pub fn add_metadata(&mut self, metadata: Metadata) -> &mut Self {
+        self.metadata.push(metadata);
+        self
     }
 
     /// Apply an override to the status

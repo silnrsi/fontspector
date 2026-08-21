@@ -1,13 +1,13 @@
 pub mod checks;
 
-use fontspector_checkapi::{ProfileBuilder, Registry};
+use fontspector_checkapi::{FontspectorError, ProfileBuilder, Registry};
 use serde_json::json;
 use std::collections::HashMap;
 
 pub struct Universal;
 
-impl fontspector_checkapi::Plugin for Universal {
-    fn register(&self, cr: &mut Registry<'_>) -> Result<(), String> {
+impl fontspector_checkapi::ProfileProvider for Universal {
+    fn register(&self, cr: &mut Registry<'_>) -> Result<(), FontspectorError> {
         // Fontwerk check, not added to profile but here's a good place to put it.
         cr.register_check(checks::ytlc_sanity);
 
@@ -46,6 +46,7 @@ impl fontspector_checkapi::Plugin for Universal {
             .add_and_register_check(checks::freetype_rasterizer);
 
         builder
+            .add_and_register_check(checks::fvar_instance_ps_names)
             .add_and_register_check(checks::fvar_name_entries)
             .add_and_register_check(checks::gpos7)
             .add_and_register_check(checks::gpos_kerning_info)
@@ -82,8 +83,10 @@ impl fontspector_checkapi::Plugin for Universal {
             .add_and_register_check(checks::typographic_family_name)
             .add_and_register_check(checks::unique_glyphnames)
             .add_and_register_check(checks::unreachable_glyphs)
+            .add_and_register_check(checks::no_vert_and_vrt2)
             .add_and_register_check(checks::unwanted_aat_tables)
             .add_and_register_check(checks::unwanted_tables)
+            .add_and_register_check(checks::dsig)
             .add_and_register_check(checks::valid_glyphnames)
             .add_and_register_check(checks::consistent_axes)
             .add_and_register_check(checks::varfont_duplexed_axis_reflow)
@@ -98,6 +101,7 @@ impl fontspector_checkapi::Plugin for Universal {
             .add_and_register_check(checks::has_glyphs)
             .add_and_register_check(checks::has_unicodes)
             .add_and_register_check(checks::required_name_ids)
+            .add_and_register_check(checks::suspicious_sidebearings)
             .build("universal", cr)
 
         //  Checks which don't make sense any more

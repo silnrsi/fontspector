@@ -1,5 +1,6 @@
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
-use tabled::builder::Builder;
+use fontations::{skrifa::MetadataProvider, types::GlyphId};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 use unicode_properties::{GeneralCategoryGroup, UnicodeGeneralCategory};
 
 fn swapcase(c: &char) -> Option<char> {
@@ -57,6 +58,7 @@ const CASE_MAPPING_EXCEPTIONS: [u32; 22] = [
 )]
 fn case_mapping(t: &Testable, context: &Context) -> CheckFnResult {
     let f = testfont!(t);
+    let mut problems = vec![];
     let mut missing_counterparts_table = vec![];
     let codepoints = f.codepoints(Some(context));
     for codepoint in codepoints.iter() {
@@ -82,28 +84,61 @@ fn case_mapping(t: &Testable, context: &Context) -> CheckFnResult {
                             .map(|s| s.to_string())
                             .unwrap_or("Unknown".to_string()),
                     );
-                    missing_counterparts_table.push(vec![have, have_not]);
+                    missing_counterparts_table.push(vec![have.clone(), have_not.clone()]);
+
+                    // Add glyph-level metadata for this missing case counterpart
+                    let glyph = f
+                        .font()
+                        .charmap()
+                        .map(*codepoint)
+                        .unwrap_or(GlyphId::new(0));
+
+                    let message =
+                        format!("Missing case-swapping counterpart for U+{:04X}", codepoint);
+                    let mut status = Status::fail("missing-case-counterparts", &message);
+                    status.add_metadata(Metadata::GlyphProblem {
+                        glyph_name: f.glyph_name_for_id_synthesise(glyph),
+                        glyph_id: glyph.to_u32(),
+                        userspace_location: None,
+                        position: None,
+                        actual: Some(json!(format!("U+{:04X}", codepoint))),
+                        expected: Some(json!(format!(
+                            "U+{:04X} (case counterpart)",
+                            swapped as u32
+                        ))),
+                        message: message.clone(),
+                    });
+                    problems.push(status);
                 }
             }
         }
     }
-    if missing_counterparts_table.is_empty() {
-        Ok(Status::just_one_pass())
-    } else {
-        let mut table = Builder::from_iter(missing_counterparts_table.into_iter());
-        table.insert_record(
-            0,
-            vec![
-                "Glyph present in the font",
-                "Missing case-swapping counterpart",
-            ],
+    return_result(problems)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::case_mapping;
+    use fontspector_checkapi::{
+        codetesting::{assert_pass, assert_results_contain, run_check, test_able},
+        StatusCode,
+    };
+
+    #[test]
+    fn test_case_mapping_fail() {
+        let testable = test_able("merriweather/Merriweather-Regular.ttf");
+        let results = run_check(case_mapping, testable);
+        assert_results_contain(
+            &results,
+            StatusCode::Fail,
+            Some("missing-case-counterparts".to_string()),
         );
-        Ok(Status::just_one_fail(
-            "missing-case-counterparts",
-            &format!(
-                "The following glyphs are missing case-swapping counterparts:\n\n{}",
-                table.build().with(tabled::settings::Style::markdown())
-            ),
-        ))
+    }
+
+    #[test]
+    fn test_case_mapping_pass() {
+        let testable = test_able("cabin/Cabin-Regular.ttf");
+        let results = run_check(case_mapping, testable);
+        assert_pass(&results);
     }
 }

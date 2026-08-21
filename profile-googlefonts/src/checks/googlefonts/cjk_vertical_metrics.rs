@@ -12,9 +12,10 @@ use fontations::{
     types::{BigEndian, GlyphId, Tag},
     write::{
         from_obj::ToOwnedTable,
-        tables::base::{self as write_base, BaseScript},
-        tables::hhea as write_hhea,
-        tables::os2 as write_os2,
+        tables::{
+            base::{self as write_base, BaseScript},
+            hhea as write_hhea, os2 as write_os2,
+        },
         FontBuilder,
     },
 };
@@ -956,7 +957,10 @@ fn comparison_base_table(
     table.to_string()
 }
 
-fn fix_vertical_metrics(t: &mut Testable) -> FixFnResult {
+fn fix_vertical_metrics(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
     let mut f = testfont!(t);
     // Check if the font has a BASE table
     if !f.has_table(b"BASE") {
@@ -1085,5 +1089,5 @@ fn fix_vertical_metrics(t: &mut Testable) -> FixFnResult {
     new_font.copy_missing_tables(f.font());
     t.set(new_font.build());
 
-    Ok(true)
+    Ok(FixResult::Fixed)
 }

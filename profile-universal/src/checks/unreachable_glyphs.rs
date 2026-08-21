@@ -1,15 +1,19 @@
 use std::collections::HashSet;
 
-use fontations::skrifa::raw::{
-    tables::{
-        colr::Paint,
-        glyf::Glyph::{Composite, Simple},
+use fontations::skrifa::{
+    charmap::MapVariant,
+    raw::{
+        tables::{
+            colr::Paint,
+            glyf::Glyph::{Composite, Simple},
+        },
+        TableProvider,
     },
-    TableProvider,
+    GlyphId, MetadataProvider,
 };
-use fontations::skrifa::{charmap::MapVariant, GlyphId, MetadataProvider};
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, GetSubstitutionMap};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, GetSubstitutionMap, Metadata};
 use itertools::Itertools;
+use serde_json::json;
 
 #[check(
     id = "unreachable_glyphs",
@@ -118,32 +122,39 @@ fn unreachable_glyphs(t: &Testable, context: &Context) -> CheckFnResult {
 
     glyphs.remove(&GlyphId::from(0u32));
 
-    if glyphs.is_empty() {
-        Ok(Status::just_one_pass())
-    } else {
-        Ok(Status::just_one_warn(
-            "unreachable-glyphs",
-            &format!(
-                "The following glyphs could not be reached by codepoint or substitution rules:\n\n{}",
-                bullet_list(
-                    context,
-                    glyphs
-                        .iter()
-                        .sorted()
-                        .map(|gid| f.glyph_name_for_id_synthesise(*gid))
-                )
-            ),
-        ))
+    let mut problems = vec![];
+    if !glyphs.is_empty() {
+        let glyph_list: Vec<String> = glyphs
+            .iter()
+            .sorted()
+            .map(|gid| f.glyph_name_for_id_synthesise(*gid))
+            .collect();
+        let message = format!(
+            "The following glyphs could not be reached by codepoint or substitution rules:\n\n{}",
+            bullet_list(context, glyph_list.clone())
+        );
+        let mut status = Status::warn("unreachable-glyphs", &message);
+        status.add_metadata(Metadata::FontProblem {
+            message: message.clone(),
+            context: Some(json!({
+                "unreachable_glyphs": glyph_list,
+                "total_unreachable": glyphs.len(),
+            })),
+        });
+        problems.push(status);
     }
+    return_result(problems)
 }
 
 #[cfg(test)]
 mod tests {
-    use fontspector_checkapi::codetesting::{
-        assert_messages_contain, assert_messages_dont_contain, assert_pass, assert_results_contain,
-        run_check, test_able,
+    use fontspector_checkapi::{
+        codetesting::{
+            assert_messages_contain, assert_messages_dont_contain, assert_pass,
+            assert_results_contain, run_check, test_able,
+        },
+        StatusCode,
     };
-    use fontspector_checkapi::StatusCode;
 
     #[test]
     fn test_check_unreachable_glyphs_pass() {

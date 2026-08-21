@@ -1,5 +1,6 @@
-use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
+use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, Metadata};
 use itertools::Itertools;
+use serde_json::json;
 use std::collections::BTreeMap;
 
 #[check(
@@ -39,20 +40,37 @@ fn varfont_instances_in_order(t: &Testable, context: &Context) -> CheckFnResult 
     for sublist in sublists {
         let wght_values: Vec<&f32> = sublist.iter().flat_map(|i| i.get("wght")).collect();
         if !wght_values.iter().is_sorted() {
-            problems.push(Status::fail(
-                "instances-not-in-order",
-                &format!(
-                    "The fvar table instances are not in ascending order of weight:\n{}",
-                    bullet_list(
-                        context,
-                        sublist.iter().map(|coords| coords
-                            .iter()
-                            .map(|(k, v)| format!("{k}={v}"))
-                            .join(", "))
-                    ),
-                ),
-            ));
+            let instances_list: Vec<String> = sublist
+                .iter()
+                .map(|coords| coords.iter().map(|(k, v)| format!("{k}={v}")).join(", "))
+                .collect();
+            let message = format!(
+                "The fvar table instances are not in ascending order of weight:\n{}",
+                bullet_list(context, &instances_list)
+            );
+            let mut status = Status::fail("instances-not-in-order", &message);
+            status.add_metadata(Metadata::TableProblem {
+                table_tag: "fvar".to_string(),
+                field_name: Some("instances".to_string()),
+                actual: Some(json!(instances_list)),
+                expected: Some(json!({ "sorted_by": "weight ascending" })),
+                message,
+            });
+            problems.push(status);
         }
     }
     return_result(problems)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::varfont_instances_in_order;
+    use fontspector_checkapi::codetesting::{assert_pass, run_check, test_able};
+
+    #[test]
+    fn test_varfont_instances_in_order_pass() {
+        let testable = test_able("ibmplexsans-vf/IBMPlexSansVar-Roman.ttf");
+        let results = run_check(varfont_instances_in_order, testable);
+        assert_pass(&results);
+    }
 }

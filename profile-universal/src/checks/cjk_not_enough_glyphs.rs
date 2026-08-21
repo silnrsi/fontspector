@@ -1,5 +1,6 @@
 use fontations::skrifa::raw::TableProvider;
-use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, TestFont};
+use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, Metadata, TestFont};
+use serde_json::json;
 
 const CJK_CODEPAGE_BITS: [u8; 5] = [17, 18, 19, 20, 21];
 
@@ -53,21 +54,61 @@ fn cjk_not_enough_glyphs(f: &Testable, context: &Context) -> CheckFnResult {
     );
     let cjk_glyphs: Vec<_> = font.cjk_codepoints(Some(context)).collect();
     let cjk_glyph_count = cjk_glyphs.len();
-    Ok(if cjk_glyph_count > 0 && cjk_glyph_count < 150 {
+
+    if cjk_glyph_count > 0 && cjk_glyph_count < 150 {
         let num_cjk_glyphs = if cjk_glyph_count == 1 {
             "There is only one CJK glyph"
         } else {
             &format!("There are only {cjk_glyph_count} CJK glyphs")
         };
-        Status::just_one_warn(
-            "cjk-not-enough-glyphs",
-            &format!(
-                "{} when there needs to be at least 150 in order to support the smallest CJK writing system, Kana.\nThe following CJK glyphs were found:\n\n{}\nPlease check that these glyphs have the correct unicodes.",
-                num_cjk_glyphs,
-                bullet_list(context, cjk_glyphs)
-            ),
-        )
-    } else {
-        Status::just_one_pass()
-    })
+        let cjk_glyphs_str: Vec<String> = cjk_glyphs.iter().map(|s| s.to_string()).collect();
+        let message = format!(
+            "{} when there needs to be at least 150 in order to support the smallest CJK writing system, Kana.\nThe following CJK glyphs were found:\n\n{}\nPlease check that these glyphs have the correct unicodes.",
+            num_cjk_glyphs,
+            bullet_list(context, cjk_glyphs_str.clone())
+        );
+        let mut status = Status::warn("cjk-not-enough-glyphs", &message);
+        status.add_metadata(Metadata::FontProblem {
+            message: message.clone(),
+            context: Some(json!({
+                "cjk_glyph_count": cjk_glyph_count,
+                "required_minimum": 150,
+                "cjk_glyphs_found": cjk_glyphs_str,
+            })),
+        });
+        return return_result(vec![status]);
+    }
+    Ok(Status::just_one_pass())
+}
+
+#[cfg(test)]
+mod tests {
+    use fontspector_checkapi::{
+        codetesting::{assert_pass, assert_results_contain, run_check, test_able},
+        StatusCode,
+    };
+
+    #[test]
+    fn test_cjk_not_enough_glyphs_pass() {
+        // NotoSansJP is a CJK font with plenty of CJK glyphs (>150), should PASS
+        // (Python test uses Iansui-Regular.ttf which is not available;
+        // NotoSansJP is an equivalent CJK font with sufficient glyphs)
+        let testable = test_able("cjk/NotoSansJP[wght].ttf");
+        let results = run_check(super::cjk_not_enough_glyphs, testable);
+        assert_pass(&results);
+    }
+
+    #[test]
+    fn test_cjk_not_enough_glyphs_skip_not_cjk() {
+        // Montserrat is not a CJK font, should be SKIPPED
+        let testable = test_able("montserrat/Montserrat-Regular.ttf");
+        let results = run_check(super::cjk_not_enough_glyphs, testable);
+        assert_results_contain(&results, StatusCode::Skip, Some("not-cjk".to_string()));
+    }
+
+    // Note: The Python test also modifies Montserrat's cmap and OS/2 codepage bits
+    // in-memory to simulate a font that claims CJK but has only 1-2 CJK glyphs,
+    // triggering WARN "cjk-not-enough-glyphs". This requires OS/2 table modification
+    // which is not available in the current Rust test utilities. A dedicated test font
+    // with CJK codepage flags but very few CJK glyphs would be needed for that test.
 }

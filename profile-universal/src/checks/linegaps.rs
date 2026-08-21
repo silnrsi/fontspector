@@ -1,5 +1,6 @@
-use fontations::skrifa::raw::TableProvider;
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
+use fontations::{skrifa::raw::TableProvider, write::from_obj::ToOwnedTable};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 
 #[check(
     id = "linegaps",
@@ -17,7 +18,8 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
     ",
     proposal = "https://github.com/fonttools/fontbakery/issues/4133",
     proposal = "https://googlefonts.github.io/gf-guide/metrics.html",
-    title = "Checking Vertical Metric linegaps."
+    title = "Checking Vertical Metric linegaps.",
+    hotfix = fix_linegaps,
 )]
 fn linegaps(t: &Testable, _context: &Context) -> CheckFnResult {
     let f = testfont!(t);
@@ -32,10 +34,73 @@ fn linegaps(t: &Testable, _context: &Context) -> CheckFnResult {
         .map_err(|_| FontspectorError::General("hhea table missing".to_string()))?;
     let mut problems = vec![];
     if hhea.line_gap().to_i16() != 0 {
-        problems.push(Status::warn("hhea", "hhea lineGap is not equal to 0."));
+        let value = hhea.line_gap().to_i16();
+        let message = "hhea lineGap is not equal to 0.";
+        let mut status = Status::warn("hhea", message);
+        status.add_metadata(Metadata::TableProblem {
+            table_tag: "hhea".to_string(),
+            field_name: Some("lineGap".to_string()),
+            actual: Some(json!(value)),
+            expected: Some(json!(0)),
+            message: message.to_string(),
+        });
+        problems.push(status);
     }
     if os2.s_typo_line_gap() != 0 {
-        problems.push(Status::warn("OS/2", "OS/2 sTypoLineGap is not equal to 0."));
+        let value = os2.s_typo_line_gap();
+        let message = "OS/2 sTypoLineGap is not equal to 0.";
+        let mut status = Status::warn("OS/2", message);
+        status.add_metadata(Metadata::TableProblem {
+            table_tag: "OS/2".to_string(),
+            field_name: Some("sTypoLineGap".to_string()),
+            actual: Some(json!(value)),
+            expected: Some(json!(0)),
+            message: message.to_string(),
+        });
+        problems.push(status);
     }
     return_result(problems)
+}
+
+fn fix_linegaps(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let f = testfont!(t);
+    let mut os2: fontations::write::tables::os2::Os2 = f.font().os2()?.to_owned_table();
+    let mut hhea: fontations::write::tables::hhea::Hhea = f.font().hhea()?.to_owned_table();
+    os2.s_typo_line_gap = 0;
+    hhea.line_gap = 0.into();
+    // Rebuild with both tables
+    let font_bytes = f.rebuild_with_new_table(&os2)?;
+    t.set(font_bytes);
+    let f = testfont!(t);
+    t.set(f.rebuild_with_new_table(&hhea)?);
+    Ok(FixResult::Fixed)
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+
+    use super::linegaps;
+    use fontspector_checkapi::{
+        codetesting::{assert_pass, assert_results_contain, run_check, test_able},
+        StatusCode,
+    };
+
+    #[test]
+    fn test_linegaps_warn() {
+        let testable = test_able("mada/Mada-Regular.ttf");
+        let results = run_check(linegaps, testable);
+        assert_results_contain(&results, StatusCode::Warn, Some("hhea".to_string()));
+    }
+
+    #[test]
+    fn test_linegaps_pass_after_fix() {
+        let mut testable = test_able("mada/Mada-Regular.ttf");
+        super::fix_linegaps(&mut testable, None).unwrap();
+        let results = run_check(linegaps, testable);
+        assert_pass(&results);
+    }
 }

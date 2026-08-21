@@ -3,11 +3,11 @@ mod checks;
 use serde_json::json;
 use std::collections::HashMap;
 
-use fontspector_checkapi::{Override, ProfileBuilder, Registry, StatusCode};
+use fontspector_checkapi::{FontspectorError, Override, ProfileBuilder, Registry, StatusCode};
 
 pub struct Fontwerk;
-impl fontspector_checkapi::Plugin for Fontwerk {
-    fn register(&self, cr: &mut Registry) -> Result<(), String> {
+impl fontspector_checkapi::ProfileProvider for Fontwerk {
+    fn register(&self, cr: &mut Registry) -> Result<(), FontspectorError> {
         let builder = ProfileBuilder::new()
             .include_profile("googlefonts")
             .with_overrides("valid_glyphnames", vec![
@@ -21,7 +21,6 @@ impl fontspector_checkapi::Plugin for Fontwerk {
             .exclude_check("googlefonts/family/italics_have_roman_counterparts")  // May need some improvements before we decide to include this one.
             .exclude_check("googlefonts/font_copyright")
             .exclude_check("googlefonts/fstype")
-            .exclude_check("googlefonts/gasp")
             .exclude_check("googlefonts/metadata/includes_production_subsets")
             .exclude_check("googlefonts/meta/script_lang_tags")
             .exclude_check("googlefonts/name/description_max_length")
@@ -69,6 +68,3 @@ impl fontspector_checkapi::Plugin for Fontwerk {
         builder.build("fontwerk", cr)
     }
 }
-
-#[cfg(not(target_family = "wasm"))]
-pluginator::plugin_implementation!(fontspector_checkapi::Plugin, Fontwerk);

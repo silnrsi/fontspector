@@ -2,8 +2,8 @@ use std::{collections::HashMap, env, path::Path, vec};
 // Provide an environment where we can run fontbakery tests
 // as-is, but have them call a Rust implementation underneath
 use fontspector_checkapi::{
-    CheckImplementation, Context, Plugin, Registry, StatusCode, Testable, TestableCollection,
-    TestableType,
+    CheckImplementation, Context, ProfileProvider, Registry, StatusCode, Testable,
+    TestableCollection, TestableType,
 };
 use profile_fontwerk::Fontwerk;
 use profile_googlefonts::GoogleFonts;
@@ -91,7 +91,7 @@ impl CheckTester {
             .get_item(0)
             .map_err(|_| PyValueError::new_err("No args found"))?;
         let testables = if first_arg.is_instance_of::<PyList>() {
-            let first_arg: &Bound<PyList> = first_arg.downcast()?;
+            let first_arg: &Bound<PyList> = first_arg.cast()?;
             first_arg
                 .iter()
                 .map(|a| obj_to_testable(py, &a))
@@ -154,6 +154,7 @@ impl CheckTester {
                 StatusCode::Warn => status_module.getattr("WARN")?,
                 StatusCode::Pass => status_module.getattr("PASS")?,
                 StatusCode::Fail => status_module.getattr("FAIL")?,
+                StatusCode::Fatal => status_module.getattr("FATAL")?,
                 StatusCode::Error => status_module.getattr("ERROR")?,
             };
             let message = message_class.call1((

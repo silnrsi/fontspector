@@ -1,6 +1,9 @@
-use fontations::skrifa::raw::TableProvider;
-use fontations::skrifa::{GlyphId, MetadataProvider};
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
+use fontations::{
+    skrifa::{raw::TableProvider, GlyphId, MetadataProvider},
+    write::from_obj::ToOwnedTable,
+};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata, TestFont};
+use serde_json::json;
 
 const AVG_CHAR_WEIGHTS: [(char, u32); 27] = [
     ('a', 64),
@@ -36,6 +39,7 @@ const AVG_CHAR_WEIGHTS: [(char, u32); 27] = [
     id = "opentype/xavgcharwidth",
     proposal = "https://github.com/fonttools/fontbakery/issues/4829",
     title = "Checking OS/2 fsSelection value.",
+    hotfix = fix_xavgcharwidth,
     rationale = "
         The OS/2.xAvgCharWidth field is used to calculate the width of a string of
         characters. It is the average width of all non-zero width glyphs in the font.
@@ -47,10 +51,49 @@ const AVG_CHAR_WEIGHTS: [(char, u32); 27] = [
 )]
 fn xavgcharwidth(f: &Testable, _context: &Context) -> CheckFnResult {
     let font = testfont!(f);
+    let (rule, expected) = compute_expected_xavgcharwidth(&font)?;
+    let actual = font.font().os2()?.x_avg_char_width();
+    let difference = (expected as i16).abs_diff(actual);
+    let mut problems = vec![];
+    match difference {
+        0 => {
+            // Pass
+        }
+        1..=10 => {
+            let msg = format!("OS/2 xAvgCharWidth is {actual} but it should be {expected} which corresponds to {rule}. These are similar values, which may be a symptom of the slightly different calculation of the xAvgCharWidth value in font editors. There's further discussion on this at https://github.com/fonttools/fontbakery/issues/1622");
+            let mut status = Status::info("xAvgCharWidth-close", &msg);
+            status.add_metadata(Metadata::TableProblem {
+                table_tag: "OS/2".to_string(),
+                field_name: Some("xAvgCharWidth".to_string()),
+                actual: Some(json!(actual)),
+                expected: Some(json!(expected)),
+                message: msg,
+            });
+            problems.push(status);
+        }
+        _ => {
+            let msg = format!("OS/2 xAvgCharWidth is {actual} but it should be {expected} which corresponds to {rule}. This may indicate a problem with the font editor or the font compiler.");
+            let mut status = Status::warn("xAvgCharWidth-wrong", &msg);
+            status.add_metadata(Metadata::TableProblem {
+                table_tag: "OS/2".to_string(),
+                field_name: Some("xAvgCharWidth".to_string()),
+                actual: Some(json!(actual)),
+                expected: Some(json!(expected)),
+                message: msg,
+            });
+            problems.push(status);
+        }
+    }
+    return_result(problems)
+}
+
+fn compute_expected_xavgcharwidth(
+    font: &TestFont,
+) -> Result<(&'static str, u32), FontspectorError> {
     let os2 = font.font().os2()?;
     let hmtx = font.font().hmtx()?;
     let charmap = font.font().charmap();
-    let (rule, expected) = if os2.version() >= 3 {
+    if os2.version() >= 3 {
         let advances = hmtx
             .h_metrics()
             .iter()
@@ -63,10 +106,10 @@ fn xavgcharwidth(f: &Testable, _context: &Context) -> CheckFnResult {
                     .to_string(),
             ));
         }
-        (
+        Ok((
             "the average of the widths of all glyphs in the font",
             advances.iter().sum::<u32>() / advances.len() as u32,
-        )
+        ))
     } else {
         let ids: Vec<Option<GlyphId>> = AVG_CHAR_WEIGHTS
             .iter()
@@ -83,24 +126,77 @@ fn xavgcharwidth(f: &Testable, _context: &Context) -> CheckFnResult {
             .zip(AVG_CHAR_WEIGHTS.iter())
             .map(|(id, (_, w))| hmtx.advance(id.unwrap()).unwrap_or(0) as u32 * w)
             .collect::<Vec<_>>();
-        (
+        Ok((
             "the weighted average of the widths of the latin lowercase glyphs in the font",
             advances.iter().sum::<u32>() / 1000u32,
-        )
+        ))
+    }
+}
+
+fn fix_xavgcharwidth(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let f = testfont!(t);
+    let (_, expected) = compute_expected_xavgcharwidth(&f)?;
+    let mut os2: fontations::write::tables::os2::Os2 = f.font().os2()?.to_owned_table();
+    os2.x_avg_char_width = expected as i16;
+    t.set(f.rebuild_with_new_table(&os2)?);
+    Ok(FixResult::Fixed)
+}
+
+#[allow(clippy::unwrap_used, clippy::expect_used)]
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fontations::{skrifa::raw::TableProvider, write::from_obj::ToOwnedTable};
+    use fontspector_checkapi::{
+        codetesting::{assert_pass, assert_results_contain, run_check, test_able},
+        StatusCode,
     };
-    let actual = os2.x_avg_char_width();
-    let difference = (expected as i16).abs_diff(actual);
-    Ok(match difference {
-        0 => Status::just_one_pass(),
-        1..=10 => Status::just_one_info(
-            "xAvgCharWidth-close",
-            &format!("OS/2 xAvgCharWidth is {actual} but it should be {expected} which corresponds to {rule}. These are similar values, which may be a symptom of the slightly different calculation of the xAvgCharWidth value in font editors. There's further discussion on this at https://github.com/fonttools/fontbakery/issues/1622"
-            )
-        ),
-        _ => Status::just_one_warn(
-            "xAvgCharWidth-wrong",
-            &format!("OS/2 xAvgCharWidth is {actual} but it should be {expected} which corresponds to {rule}. This may indicate a problem with the font editor or the font compiler."
-            )
-        )
-    })
+
+    #[test]
+    fn test_xavgcharwidth_pass() {
+        let testable = test_able("nunito/Nunito-Regular.ttf");
+        let result = run_check(xavgcharwidth, testable);
+        assert_pass(&result);
+    }
+
+    #[test]
+    fn test_xavgcharwidth_close() {
+        let mut testable = test_able("nunito/Nunito-Regular.ttf");
+        let f = TTF.from_testable(&testable).unwrap();
+        let mut os2: fontations::write::tables::os2::Os2 = f.font().os2().unwrap().to_owned_table();
+        os2.x_avg_char_width = 556;
+        testable.set(f.rebuild_with_new_table(&os2).unwrap());
+        let result = run_check(xavgcharwidth, testable);
+        assert_results_contain(
+            &result,
+            StatusCode::Info,
+            Some("xAvgCharWidth-close".to_string()),
+        );
+    }
+
+    #[test]
+    fn test_xavgcharwidth_wrong() {
+        let mut testable = test_able("nunito/Nunito-Regular.ttf");
+        let f = TTF.from_testable(&testable).unwrap();
+        let mut os2: fontations::write::tables::os2::Os2 = f.font().os2().unwrap().to_owned_table();
+        os2.x_avg_char_width = 500;
+        testable.set(f.rebuild_with_new_table(&os2).unwrap());
+        let result = run_check(xavgcharwidth, testable);
+        assert_results_contain(
+            &result,
+            StatusCode::Warn,
+            Some("xAvgCharWidth-wrong".to_string()),
+        );
+    }
+
+    // TODO: The Python test also covers the following edge cases which
+    // require font subsetting (via fontTools.subset) - hard to port:
+    // 1. Subset font to [a-z, space], OS/2 version=2, xAvgCharWidth=447 -> PASS
+    // 2. Subset font, xAvgCharWidth=450 -> INFO "xAvgCharWidth-close"
+    // 3. Subset font, xAvgCharWidth=500 -> WARN "xAvgCharWidth-wrong"
+    // 4. Further subset font (removing 'a') -> ERROR
+    // These could be covered by pre-building subsetted font fixtures.
 }

@@ -1,9 +1,13 @@
-use fontations::skrifa::raw::TableProvider;
-use fontations::skrifa::{
-    prelude::{LocationRef, Size},
-    MetadataProvider,
+use fontations::{
+    skrifa::{
+        prelude::{LocationRef, Size},
+        raw::TableProvider,
+        MetadataProvider,
+    },
+    write::from_obj::ToOwnedTable,
 };
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 
 #[check(
     id = "typoascender_exceeds_Agrave",
@@ -22,7 +26,8 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
     ",
     proposal = "https://github.com/fonttools/fontbakery/issues/3170",
     title = "Checking that the typoAscender exceeds the yMax of the /Agrave.",
-    metadata = "{\"experimental\": \"since 2024/Jul/17\"}"
+    metadata = "{\"experimental\": \"since 2024/Jul/17\"}",
+    hotfix = fix_typoascender_exceeds_Agrave,
 )]
 fn typoascender_exceeds_Agrave(f: &Testable, _context: &Context) -> CheckFnResult {
     let font = testfont!(f);
@@ -46,15 +51,46 @@ fn typoascender_exceeds_Agrave(f: &Testable, _context: &Context) -> CheckFnResul
             "Error getting bounds of Agrave (maybe it's empty?)".to_string(),
         ))?;
     let typo_ascender = os2.s_typo_ascender();
-    Ok(if (typo_ascender as f32) < metrics.y_max {
-        Status::just_one_warn(
-            "typoAscender",
-            &format!(
-                "OS/2.sTypoAscender value should be greater than {}, but got {} instead",
-                metrics.y_max, typo_ascender
-            ),
-        )
-    } else {
-        Status::just_one_pass()
-    })
+    let mut problems = vec![];
+    if (typo_ascender as f32) < metrics.y_max {
+        let message = format!(
+            "OS/2.sTypoAscender value should be greater than {}, but got {} instead",
+            metrics.y_max, typo_ascender
+        );
+        let mut status = Status::warn("typoAscender", &message);
+        status.add_metadata(Metadata::TableProblem {
+            table_tag: "OS/2".to_string(),
+            field_name: Some("sTypoAscender".to_string()),
+            actual: Some(json!(typo_ascender)),
+            expected: Some(json!({ "min": metrics.y_max })),
+            message: message.clone(),
+        });
+        problems.push(status);
+    }
+    return_result(problems)
+}
+
+fn fix_typoascender_exceeds_Agrave(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let f = testfont!(t);
+    let agrave = f.font().charmap().map(0x00C0u32);
+    let Some(agrave) = agrave else {
+        return Ok(FixResult::Unfixable);
+    };
+    let Some(bounds) = f
+        .font()
+        .glyph_metrics(Size::unscaled(), LocationRef::new(&[]))
+        .bounds(agrave)
+    else {
+        return Ok(FixResult::Unfixable);
+    };
+    let mut os2: fontations::write::tables::os2::Os2 = f.font().os2()?.to_owned_table();
+    if (os2.s_typo_ascender as f32) < bounds.y_max {
+        os2.s_typo_ascender = bounds.y_max.ceil() as i16;
+        t.set(f.rebuild_with_new_table(&os2)?);
+        return Ok(FixResult::Fixed);
+    }
+    Ok(FixResult::Unfixable)
 }

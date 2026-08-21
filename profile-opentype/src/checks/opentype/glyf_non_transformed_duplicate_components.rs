@@ -1,9 +1,12 @@
-use fontations::skrifa::raw::{
-    tables::glyf::{Anchor, Glyph},
-    TableProvider,
+use fontations::skrifa::{
+    raw::{
+        tables::glyf::{Anchor, Glyph},
+        TableProvider,
+    },
+    GlyphId,
 };
-use fontations::skrifa::GlyphId;
-use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
+use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 use std::collections::HashSet;
 
 #[check(
@@ -19,13 +22,13 @@ use std::collections::HashSet;
     proposal = "https://github.com/fonttools/fontbakery/pull/2709",
     title = "Check glyphs do not have duplicate components which have the same x,y coordinates."
 )]
-fn glyf_non_transformed_duplicate_components(t: &Testable, context: &Context) -> CheckFnResult {
+fn glyf_non_transformed_duplicate_components(t: &Testable, _context: &Context) -> CheckFnResult {
     let ttf = testfont!(t);
     let font = ttf.font();
     skip!(!ttf.has_table(b"glyf"), "no-glyf", "No glyf table");
     let glyf = font.glyf()?;
     let loca = font.loca(None)?;
-    let mut messages = vec![];
+    let mut problems = vec![];
     for gid in 0..font.maxp()?.num_glyphs() {
         let gid = GlyphId::new(gid.into());
         if let Some(Glyph::Composite(glyph)) = loca.get_glyf(gid, &glyf)? {
@@ -33,26 +36,43 @@ fn glyf_non_transformed_duplicate_components(t: &Testable, context: &Context) ->
             for component in glyph.components() {
                 if let Anchor::Offset { x, y } = component.anchor {
                     if !components.insert((component.glyph, x, y)) {
-                        messages.push(format!(
-                            "{}: duplicate component {} at {},{}",
+                        let msg = format!(
+                            "{}: duplicate component {} at {},{}. Duplicate components may cause rendering issues.",
                             ttf.glyph_name_for_id_synthesise(gid),
                             ttf.glyph_name_for_id_synthesise(component.glyph),
                             x,
                             y
-                        ));
+                        );
+                        let mut status = Status::fail("found-duplicates", &msg);
+                        status.add_metadata(Metadata::GlyphProblem {
+                            glyph_name: ttf.glyph_name_for_id_synthesise(gid),
+                            glyph_id: gid.to_u32(),
+                            userspace_location: None,
+                            position: Some((x as f32, y as f32)),
+                            actual: Some(json!({
+                                "component": ttf.glyph_name_for_id_synthesise(component.glyph),
+                                "duplicate_at": [x, y]
+                            })),
+                            expected: Some(json!("No duplicate components at same position")),
+                            message: msg,
+                        });
+                        problems.push(status);
                     }
                 }
             }
         }
     }
-    if messages.is_empty() {
-        Ok(Status::just_one_pass())
-    } else {
-        Ok(
-            Status::just_one_fail("found-duplicates", 
-                &format!("The following glyphs have duplicate components which have the same x,y coordinates.\n\n{}",
-                    bullet_list(context, messages))
-            )
-        )
+    return_result(problems)
+}
+
+#[cfg(test)]
+mod tests {
+    use fontspector_checkapi::codetesting::{assert_pass, run_check, test_able};
+
+    #[test]
+    fn test_glyf_non_transformed_duplicate_components_pass() {
+        let testable = test_able("nunito/Nunito-Regular.ttf");
+        let result = run_check(super::glyf_non_transformed_duplicate_components, testable);
+        assert_pass(&result);
     }
 }

@@ -1,5 +1,5 @@
 //! The google fonts profile for Fontspector
-mod checks;
+pub mod checks;
 
 pub(crate) mod constants;
 use fontspector_checkapi::{prelude::*, ProfileBuilder, Registry};
@@ -31,8 +31,8 @@ pub(crate) fn seems_like_gf_repo(c: &TestableCollection) -> bool {
 
 /// The main plugin struct for the Google Fonts profile.
 pub struct GoogleFonts;
-impl fontspector_checkapi::Plugin for GoogleFonts {
-    fn register(&self, cr: &mut Registry) -> Result<(), String> {
+impl fontspector_checkapi::ProfileProvider for GoogleFonts {
+    fn register(&self, cr: &mut Registry) -> Result<(), FontspectorError> {
         let mdpb = FileType::new("METADATA.pb");
         let desc = FileType::new("*.en_us.html");
         cr.register_filetype("MDPB", mdpb);
@@ -110,10 +110,12 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::description::has_article)
             .add_and_register_check(checks::googlefonts::description::has_unsupported_elements)
             .add_and_register_check(checks::googlefonts::description::min_length)
+            .add_and_register_check(checks::googlefonts::description::no_free_word)
             .add_and_register_check(checks::googlefonts::description::urls)
             .add_and_register_check(checks::googlefonts::description::valid_html)
             .add_section("Family Checks")
             .add_and_register_check(checks::googlefonts::family::equal_codepoint_coverage)
+            .add_and_register_check(checks::googlefonts::family::file_size)
             .add_and_register_check(checks::googlefonts::family::italics_have_roman_counterparts)
             .add_and_register_check(checks::googlefonts::family::tnum_horizontal_metrics)
             .add_section("Name table checks")
@@ -131,6 +133,7 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::name::license_url)
             .add_and_register_check(checks::googlefonts::name::rfn)
             .add_section("Repository Checks")
+            .add_and_register_check(checks::googlefonts::repo::ascii_filenames)
             .add_and_register_check(checks::googlefonts::repo::dirname_matches_nameid_1)
             .add_and_register_check(checks::googlefonts::repo::vf_has_static_fonts)
             //            checks::googlefonts::repo::fb_report // Upstream repos should be checked separately
@@ -178,8 +181,10 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::name::description_max_length)
             .add_and_register_check(checks::googlefonts::name::familyname_first_char)
             .add_and_register_check(checks::googlefonts::name::mandatory_entries)
+            .add_and_register_check(checks::googlefonts::name::illegal_particles)
             .add_and_register_check(checks::googlefonts::name::version_format)
             .add_and_register_check(checks::googlefonts::old_ttfautohint)
+            .add_and_register_check(checks::googlefonts::parametric_axes_hidden)
             // checks::googlefonts::production_encoded_glyphs // DISABLED
             // checks::googlefonts::production_glyphs_similarity // Unlikely to be useful in the short term
             // checks::googlefonts::description::family_update // Unlikely to useful yet
@@ -187,10 +192,12 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .add_and_register_check(checks::googlefonts::STAT::axis_order)
             .add_and_register_check(checks::googlefonts::STAT::axisregistry)
             .add_and_register_check(checks::googlefonts::STAT::compulsory_axis_values)
+            .add_and_register_check(checks::googlefonts::STAT::opsz_not_elided)
             .add_and_register_check(checks::googlefonts::unitsperem)
             .add_and_register_check(checks::googlefonts::use_typo_metrics)
             // Not porting generate_static, see fontbakery#1727
             .add_and_register_check(checks::googlefonts::varfont::has_HVAR)
+            .add_and_register_check(checks::googlefonts::varfont::slnt_needs_italic)
             .add_and_register_check(checks::googlefonts::vendor_id)
             .add_and_register_check(checks::googlefonts::version_bump)
             .add_and_register_check(checks::googlefonts::vertical_metrics)
@@ -209,8 +216,15 @@ impl fontspector_checkapi::Plugin for GoogleFonts {
             .with_configuration_defaults(
                 "file_size",
                 HashMap::from([
-                    ("WARN_SIZE".to_string(), json!(1048576)), // 1Mb
-                    ("FAIL_SIZE".to_string(), json!(9437184)), // 9Mb
+                    ("WARN_SIZE".to_string(), json!(1048576)),   // 1Mb
+                    ("FAIL_SIZE".to_string(), json!(9437184)),   // 9Mb
+                    ("FATAL_SIZE".to_string(), json!(10485760)), // 10Mb
+                ]),
+            )
+            .with_configuration_defaults(
+                "googlefonts/family/file_size",
+                HashMap::from([
+                    ("FATAL_SIZE".to_string(), json!(26214400)), // 25Mb
                 ]),
             );
 

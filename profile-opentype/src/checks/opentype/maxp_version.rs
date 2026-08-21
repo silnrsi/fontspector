@@ -2,7 +2,8 @@ use fontations::{
     skrifa::raw::TableProvider,
     write::{from_obj::ToOwnedTable, tables::maxp::Maxp},
 };
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, TestFont};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata, TestFont};
+use serde_json::json;
 
 enum VersionStatus {
     Ok,
@@ -42,24 +43,47 @@ fn check_maxp_version(f: &TestFont) -> Result<VersionStatus, FontspectorError> {
 fn maxp_version(t: &Testable, _context: &Context) -> CheckFnResult {
     let f = testfont!(t);
     let status = check_maxp_version(&f)?;
-    Ok(match status {
-        VersionStatus::Ok => Status::just_one_pass(),
-        VersionStatus::NeedsUpgrade => Status::just_one_fail(
-            "version-upgrade-needed",
-            "maxp table version is 1.0, but should be 0.5 for CFF outlines",
-        ),
-        VersionStatus::NeedsDowngrade => Status::just_one_fail(
-            "version-downgrade-needed",
-            "maxp table version is 0.5, but should be 1.0 for TrueType outlines",
-        ),
-    })
+    let mut problems = vec![];
+    match status {
+        VersionStatus::Ok => {
+            // Pass
+        }
+        VersionStatus::NeedsUpgrade => {
+            let msg = "maxp table version is 1.0, but should be 0.5 for CFF outlines";
+            let mut st = Status::fail("version-upgrade-needed", msg);
+            st.add_metadata(Metadata::TableProblem {
+                table_tag: "maxp".to_string(),
+                field_name: Some("version".to_string()),
+                actual: Some(json!("1.0")),
+                expected: Some(json!("0.5")),
+                message: msg.to_string(),
+            });
+            problems.push(st);
+        }
+        VersionStatus::NeedsDowngrade => {
+            let msg = "maxp table version is 0.5, but should be 1.0 for TrueType outlines";
+            let mut st = Status::fail("version-downgrade-needed", msg);
+            st.add_metadata(Metadata::TableProblem {
+                table_tag: "maxp".to_string(),
+                field_name: Some("version".to_string()),
+                actual: Some(json!("0.5")),
+                expected: Some(json!("1.0")),
+                message: msg.to_string(),
+            });
+            problems.push(st);
+        }
+    }
+    return_result(problems)
 }
 
-fn fix_maxp_version(t: &mut Testable) -> FixFnResult {
+fn fix_maxp_version(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
     let f = testfont!(t);
     let status = check_maxp_version(&f)?;
     match status {
-        VersionStatus::Ok => Ok(false),
+        VersionStatus::Ok => Ok(FixResult::Unfixable),
         VersionStatus::NeedsUpgrade => {
             // Too complex, refuse
             Err(FontspectorError::Fix(
@@ -84,14 +108,17 @@ fn fix_maxp_version(t: &mut Testable) -> FixFnResult {
             maxp.max_component_depth = None;
             let font = f.rebuild_with_new_table(&maxp)?;
             t.set(font);
-            Ok(true)
+            Ok(FixResult::Fixed)
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use fontspector_checkapi::{codetesting::run_check, codetesting::test_able, StatusCode};
+    use fontspector_checkapi::{
+        codetesting::{run_check, test_able},
+        StatusCode,
+    };
 
     use super::*;
 
@@ -123,7 +150,7 @@ mod tests {
         assert_eq!(result.worst_status(), StatusCode::Fail);
 
         // Fix it
-        let fixed = (maxp_version.hotfix.unwrap())(&mut ssp_otf).unwrap();
-        assert!(fixed);
+        let fixed = (maxp_version.hotfix.unwrap())(&mut ssp_otf, None).unwrap();
+        assert!(fixed.is_success());
     }
 }

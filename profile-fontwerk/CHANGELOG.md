@@ -5,7 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.2 (2026-06-26)
+
+## v1.3.1 (2026-05-18)
+
+<csr-id-7b32eca0846e594655f304250928295ffbf6496a/>
+
+### Refactor
+
+ - <csr-id-7b32eca0846e594655f304250928295ffbf6496a/> New plugin architecture
+   * refactor: Remove fontbakery-bridge
+   
+   * refactor: New plugin architecture
+   
+   * feat: Demonstrate Python-based plugins
+   
+   * docs: New plugin architecture
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 84 days passed between releases.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 1 unique issue was worked on: [#782](https://github.com/fonttools/fontspector/issues/782)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#782](https://github.com/fonttools/fontspector/issues/782)**
+    - New plugin architecture ([`7b32eca`](https://github.com/fonttools/fontspector/commit/7b32eca0846e594655f304250928295ffbf6496a))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.6.0, fontspector-profile-fontwerk v1.3.1, fontspector-profile-googlefonts v1.8.0, fontspector-profile-iso15008 v1.0.6, fontspector-profile-opentype v1.5.0, fontspector-profile-universal v1.8.0, fontspector-hotfix v0.2.0, fontspector v1.7.0, safety bump fontspector-hotfix v0.2.0 ([`b319e16`](https://github.com/fonttools/fontspector/commit/b319e16d70daabfed30fcb18d66b8400c00fd32f))
+</details>
+
+## v1.3.0 (2026-02-23)
+
+### New Features
+
+ - <csr-id-708d0735051541701cc46667192450bcfec307d5/> removing .exclude_check("googlefonts/gasp")
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 16 days passed between releases.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 1 unique issue was worked on: [#635](https://github.com/fonttools/fontspector/issues/635)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#635](https://github.com/fonttools/fontspector/issues/635)**
+    - Removing .exclude_check("googlefonts/gasp") ([`708d073`](https://github.com/fonttools/fontspector/commit/708d0735051541701cc46667192450bcfec307d5))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.5.0, fontspector-fontbakery-bridge v1.3.0, fontspector-profile-fontwerk v1.3.0, fontspector-profile-googlefonts v1.7.0, fontspector-profile-opentype v1.4.0, fontspector-profile-universal v1.7.0, fontspector-hotfix v0.1.0, fontspector v1.6.0, safety bump fontspector-hotfix v0.1.0 ([`cb2a669`](https://github.com/fonttools/fontspector/commit/cb2a669f1f0963a68ba22bdc1e0cd56e602219ca))
+</details>
+
+## v1.2.3 (2026-02-06)
+
+<csr-id-19b91cdf15a6d8ea7e60b616199d28e03c76ba4d/>
+
+### Chore
+
+ - <csr-id-19b91cdf15a6d8ea7e60b616199d28e03c76ba4d/> Reformat
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release over the course of 1 calendar day.
+ - 2 days passed between releases.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 1 unique issue was worked on: [#611](https://github.com/fonttools/fontspector/issues/611)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#611](https://github.com/fonttools/fontspector/issues/611)**
+    - Reformat ([`19b91cd`](https://github.com/fonttools/fontspector/commit/19b91cdf15a6d8ea7e60b616199d28e03c76ba4d))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.4.0, fontspector-profile-fontwerk v1.2.3, fontspector-profile-googlefonts v1.6.1, fontspector-profile-opentype v1.3.1, fontspector-profile-universal v1.6.0, fontspector v1.5.4 ([`b27d3e3`](https://github.com/fonttools/fontspector/commit/b27d3e3ab7e2cf650a02883d776808bde0611edd))
+</details>
+
 ## v1.2.2 (2026-02-04)
+
+<csr-id-a755d98f2dcb10c675c0084588ca16eee2a5f313/>
+<csr-id-c69d124501d4251aee6a0d54233a3cc627d5f325/>
 
 ### Refactor
 
@@ -17,8 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 2 commits contributed to the release over the course of 25 calendar days.
- - 47 days passed between releases.
+ - 3 commits contributed to the release over the course of 25 calendar days.
+ - 48 days passed between releases.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 2 unique issues were worked on: [#480](https://github.com/fonttools/fontspector/issues/480), [#583](https://github.com/fonttools/fontspector/issues/583)
 
@@ -32,6 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Replace get_name_PEL_codes and get_name_entry_string ([`c69d124`](https://github.com/fonttools/fontspector/commit/c69d124501d4251aee6a0d54233a3cc627d5f325))
  * **[#583](https://github.com/fonttools/fontspector/issues/583)**
     - Regular weight fonts often don't have 'Regular' in its name, fix edge cases ([`a755d98`](https://github.com/fonttools/fontspector/commit/a755d98f2dcb10c675c0084588ca16eee2a5f313))
+ * **Uncategorized**
+    - Release fontspector-checkapi v1.3.2, fontspector-profile-fontwerk v1.2.2, fontspector-profile-googlefonts v1.6.0, fontspector-profile-universal v1.5.0, fontspector-profile-iso15008 v1.0.5, fontspector v1.5.3 ([`43eb125`](https://github.com/fonttools/fontspector/commit/43eb125ce74b3424af90f5f9aa8082fdb4e2e742))
 </details>
 
 ## v1.2.1 (2025-12-17)
@@ -186,7 +285,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <csr-unknown>
 <csr-unknown>
 <csr-unknown>
+<csr-unknown>
+<csr-unknown>
+<csr-unknown>
+<csr-unknown>
 Don’t bump the version number manually, this will happen automatically on release<csr-unknown/>
+<csr-unknown/>
+<csr-unknown/>
+<csr-unknown/>
+<csr-unknown/>
 <csr-unknown/>
 <csr-unknown/>
 

@@ -1,4 +1,5 @@
-use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert};
+use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 
 #[check(
     id = "googlefonts/varfont/has_HVAR",
@@ -24,11 +25,49 @@ fn has_HVAR(t: &Testable, _context: &Context) -> CheckFnResult {
         "variable-font",
         "Font is not a variable font."
     );
-    Ok(if f.has_table(b"HVAR") {
-        Status::just_one_pass()
+    let mut problems = vec![];
+    if f.has_table(b"HVAR") {
+        problems.push(Status::pass());
     } else {
-        Status::just_one_fail("lacks-HVAR",
+        let msg = "Missing HVAR table in variable font";
+        let mut status = Status::fail("lacks-HVAR",
             "All variable fonts on the Google Fonts collection must have a properly set HVAR table in order to avoid costly text-layout operations on certain platforms."
-        )
-    })
+        );
+        status.add_metadata(Metadata::TableProblem {
+            table_tag: "HVAR".to_string(),
+            field_name: None,
+            actual: Some(json!("missing")),
+            expected: Some(json!("HVAR table present")),
+            message: msg.to_string(),
+        });
+        problems.push(status);
+    }
+    return_result(problems)
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
+
+    use fontspector_checkapi::{
+        codetesting::{assert_results_contain, assert_skip, remove_table, run_check, test_able},
+        StatusCode,
+    };
+
+    use super::has_HVAR;
+
+    #[test]
+    fn test_skip_static_font() {
+        let testable = test_able("mada/Mada-Regular.ttf");
+        let results = run_check(has_HVAR, testable);
+        assert_skip(&results);
+    }
+
+    #[test]
+    fn test_fail_vf_without_hvar() {
+        let mut testable = test_able("varfont/inter/Inter[slnt,wght].ttf");
+        remove_table(&mut testable, b"HVAR");
+        let results = run_check(has_HVAR, testable);
+        assert_results_contain(&results, StatusCode::Fail, Some("lacks-HVAR".to_string()));
+    }
 }

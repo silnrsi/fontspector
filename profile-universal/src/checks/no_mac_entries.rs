@@ -1,5 +1,9 @@
-use fontations::skrifa::raw::TableProvider;
-use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
+use fontations::{
+    skrifa::raw::TableProvider,
+    write::tables::name::{Name, NameRecord},
+};
+use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
+use serde_json::json;
 
 #[check(
     id = "no_mac_entries",
@@ -13,20 +17,56 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
         Olli Meier a couple years ago (as of January/2022) that these entries are
         outdated and should not be produced anymore.",
     proposal = "https://github.com/googlefonts/gftools/issues/469",
-    title = "Ensure font doesn't have Mac name table entries (platform=1)."
+    title = "Ensure font doesn't have Mac name table entries (platform=1).",
+    hotfix = fix_no_mac_entries,
 )]
 fn no_mac_entries(t: &Testable, _context: &Context) -> CheckFnResult {
     let f = testfont!(t);
     let mut problems = vec![];
     for rec in f.font().name()?.name_record() {
         if rec.platform_id() == 1 {
-            problems.push(Status::fail(
-                "mac-names",
-                &format!("Please remove name ID {}", rec.name_id()),
-            ))
+            let message = format!("Please remove name ID {}", rec.name_id());
+            let mut status = Status::fail("mac-names", &message);
+            status.add_metadata(Metadata::TableProblem {
+                table_tag: "name".to_string(),
+                field_name: Some(format!("nameID {} platform", rec.name_id())),
+                actual: Some(json!(rec.platform_id())),
+                expected: Some(json!("(not present)")),
+                message: message.clone(),
+            });
+            problems.push(status);
         }
     }
     return_result(problems)
+}
+
+fn fix_no_mac_entries(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let f = testfont!(t);
+    let name_table = f.font().name()?;
+    let new_records: Vec<NameRecord> = name_table
+        .name_record()
+        .iter()
+        .filter(|r| r.platform_id() != 1)
+        .map(|r| {
+            let string = r
+                .string(name_table.string_data())
+                .map(|s| s.chars().collect::<String>())
+                .unwrap_or_default();
+            NameRecord::new(
+                r.platform_id(),
+                r.encoding_id(),
+                r.language_id(),
+                r.name_id(),
+                string.into(),
+            )
+        })
+        .collect();
+    let new_name = Name::new(new_records);
+    t.set(f.rebuild_with_new_table(&new_name)?);
+    Ok(FixResult::Fixed)
 }
 
 #[cfg(test)]
