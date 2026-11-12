@@ -45,6 +45,7 @@ profile-googlefonts = { path = "../profile-googlefonts", version = "1.0.0", pack
 profile-microsoft = { path = "../profile-microsoft", version = "^0.1.0", package = "fontspector-profile-microsoft", features = [
     "sourcefix",
 ] }
+profile-adobe = { path = "../profile-adobe", version = "1.0.0", package = "fontspector-profile-adobe" }
 # Monotype doesn't have any source fixes yet. I mean, neither do many
 # others, but it doesn't even declare the feature.
 profile-monotype = { path = "../profile-monotype", version = "1.0.0", package = "fontspector-profile-monotype" }

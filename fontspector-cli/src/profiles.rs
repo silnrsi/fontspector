@@ -6,8 +6,8 @@ use profile_microsoft::Microsoft;
 use profile_monotype::Monotype;
 use profile_opentype::OpenType;
 use profile_silfonts::SILfonts;
-use profile_universal::Universal;
 use profile_adobe::Adobe;
+use profile_universal::Universal;
 use std::{io::Read, path::PathBuf};
 
 use crate::args::Args;
@@ -72,6 +72,24 @@ pub(crate) fn register_core_profiles(args: &Args, registry: &mut Registry<'stati
     Fontwerk
         .register(registry)
         .expect("Couldn't register fontwerk profile, fontspector bug");
-==== BASE ====
-==== BASE ====
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Monotype
+        .register(registry)
+        .expect("Couldn't register monotype profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Microsoft
+        .register(registry)
+        .expect("Couldn't register microsoft profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    Adobe
+        .register(registry)
+        .expect("Couldn't register adobe profile, fontspector bug");
+
+    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
+    SILfonts
+        .register(registry)
+        .expect("Couldn't register silfonts profile, fontspector bug");
 }

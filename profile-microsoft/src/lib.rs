@@ -35,4 +35,3 @@ impl fontspector_checkapi::ProfileProvider for Microsoft {
         builder.build("microsoft", cr)
     }
 }
-

@@ -70,4 +70,3 @@ impl fontspector_checkapi::ProfileProvider for Adobe {
         builder.build("adobefonts", cr)
     }
 }
-
