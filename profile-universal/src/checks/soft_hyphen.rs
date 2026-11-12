@@ -1,11 +1,10 @@
-use fontations::{
-    read::{tables::cmap::CmapSubtable, TableProvider},
-    skrifa::MetadataProvider,
-    types::GlyphId,
-    write::tables::cmap::Cmap,
-};
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata, MoreInfoReplies};
 use serde_json::json;
+use skrifa::{
+    raw::{tables::cmap::CmapSubtable, TableProvider},
+    MetadataProvider,
+};
+use write_fonts::{tables::cmap::Cmap, types::GlyphId};
 
 #[check(
     id = "soft_hyphen",
@@ -30,6 +29,7 @@ use serde_json::json;
     proposal = "https://github.com/fonttools/fontbakery/issues/3486",
     title = "Does the font contain a soft hyphen?",
     hotfix = fix_soft_hyphen,
+    fix_source = sourcefix_softhyphen,
 )]
 fn soft_hyphen(t: &Testable, context: &Context) -> CheckFnResult {
     let f = testfont!(t);
@@ -81,16 +81,34 @@ fn fix_soft_hyphen(
     Ok(FixResult::Fixed)
 }
 
+#[cfg(feature = "sourcefix")]
+fn sourcefix_softhyphen(
+    s: &mut fontspector_checkapi::source::SourceFile,
+    _problems: &[Status],
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let font = &mut s.source;
+    let had_one = font.glyphs.iter().any(|g| g.codepoints.contains(&0xAD));
+    if !had_one {
+        log::info!("No soft hyphen glyph found in Glyphs file.");
+        return Ok(FixResult::NotBroken);
+    }
+    font.glyphs.retain(|g| !g.codepoints.contains(&0xAD));
+    log::info!("Removing soft hyphen glyph from Glyphs file.");
+    Ok(FixResult::Fixed)
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
 
     use super::soft_hyphen;
-    use fontations::{skrifa::MetadataProvider, write::tables::cmap::Cmap};
     use fontspector_checkapi::{
         codetesting::{assert_pass, assert_results_contain, run_check, test_able},
         FileTypeConvert, StatusCode,
     };
+    use skrifa::MetadataProvider;
+    use write_fonts::tables::cmap::Cmap;
 
     #[test]
     fn test_soft_hyphen_warn() {

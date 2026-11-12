@@ -1,6 +1,6 @@
-use fontations::skrifa::raw::types::NameId;
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
 use serde_json::json;
+use skrifa::raw::types::NameId;
 
 #[check(
     id = "name/char_restrictions",
@@ -104,11 +104,11 @@ mod tests {
     #![allow(clippy::unwrap_used)]
 
     use super::char_restrictions;
-    use fontations::skrifa::raw::types::NameId;
     use fontspector_checkapi::{
         codetesting::{assert_pass, assert_results_contain, run_check, set_name_entry, test_able},
         StatusCode,
     };
+    use skrifa::raw::types::NameId;
 
     #[test]
     fn test_char_restrictions_pass() {
@@ -130,5 +130,58 @@ mod tests {
         );
         let results = run_check(char_restrictions, testable);
         assert_results_contain(&results, StatusCode::Fail, Some("bad-string".to_string()));
+        assert_results_contain(&results, StatusCode::Fail, Some("bad-strings".to_string()));
+    }
+
+    #[test]
+    fn test_char_restrictions_fail_bad_postscript_cid() {
+        // Non-ASCII is not allowed in name ID 20 (PostScript CID findfont name).
+        let mut testable = test_able("merriweather/Merriweather-Regular.ttf");
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            NameId::POSTSCRIPT_CID_NAME,
+            "Infração".to_string(),
+        );
+        let results = run_check(char_restrictions, testable);
+        assert_results_contain(&results, StatusCode::Fail, Some("bad-string".to_string()));
+        assert_results_contain(&results, StatusCode::Fail, Some("bad-strings".to_string()));
+    }
+
+    #[test]
+    fn test_char_restrictions_fail_bad_variations_prefix() {
+        // Only a-zA-Z0-9 is allowed in name ID 25, so a single '!' is fatal.
+        let mut testable = test_able("merriweather/Merriweather-Regular.ttf");
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            NameId::VARIATIONS_POSTSCRIPT_NAME_PREFIX,
+            "ILikeSimpleStuff!".to_string(),
+        );
+        let results = run_check(char_restrictions, testable);
+        assert_results_contain(&results, StatusCode::Fail, Some("bad-string".to_string()));
+        assert_results_contain(&results, StatusCode::Fail, Some("bad-strings".to_string()));
+    }
+
+    #[test]
+    fn test_char_restrictions_pass_unrestricted_nameid() {
+        // Name ID 19 is not one of the restricted entries, so unrestricted
+        // characters (including the ones banned for the PostScript names)
+        // must not be reported.
+        let mut testable = test_able("merriweather/Merriweather-Regular.ttf");
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            NameId::new(19),
+            "[{<(Fantástico! /%)>}]".to_string(),
+        );
+        let results = run_check(char_restrictions, testable);
+        assert_pass(&results);
     }
 }

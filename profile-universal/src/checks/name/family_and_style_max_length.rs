@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use fontations::skrifa::raw::{tables::name::Name, types::NameId, TableProvider};
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
 use serde_json::json;
+use skrifa::raw::{tables::name::Name, types::NameId, TableProvider};
 
 fn strip_ribbi(name: &str) -> String {
     name.replace(" Regular", "")
@@ -61,8 +61,8 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
 
     let mut problems = vec![];
     for name in f.get_name_entry_strings(NameId::FULL_NAME) {
-        if strip_ribbi(&name).len() > full_name_length {
-            let chars_too_long_count = strip_ribbi(&name).len() - full_name_length;
+        if strip_ribbi(&name).chars().count() > full_name_length {
+            let chars_too_long_count = strip_ribbi(&name).chars().count() - full_name_length;
             let chars_too_long = chars_too_long_count.to_string();
             let message = format!(
                 "Name ID 4 'Full Font Name' exceeds {} characters ({} characters too long). This has been found to cause problems with the dropdown menu in old versions of Microsoft Word as well as shaping issues for some accented letters in Microsoft Word on Windows 10 and 11.",
@@ -73,7 +73,7 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
             status.add_metadata(Metadata::TableProblem {
                 table_tag: "name".to_string(),
                 field_name: Some("nameID 4".to_string()),
-                actual: Some(json!(strip_ribbi(&name).len())),
+                actual: Some(json!(strip_ribbi(&name).chars().count())),
                 expected: Some(json!(full_name_length)),
                 message: message.clone(),
             });
@@ -81,8 +81,8 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
         }
     }
     for name in f.get_name_entry_strings(NameId::POSTSCRIPT_NAME) {
-        if name.len() > postscript_name_length {
-            let chars_too_long_count = name.len() - postscript_name_length;
+        if name.chars().count() > postscript_name_length {
+            let chars_too_long_count = name.chars().count() - postscript_name_length;
             let chars_too_long = chars_too_long_count.to_string();
             let message = format!(
                 "Name ID 6 'PostScript Name' exceeds {} characters ({} characters too long). This has been found to cause problems with PostScript printers, especially on Mac platforms.",
@@ -93,7 +93,7 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
             status.add_metadata(Metadata::TableProblem {
                 table_tag: "name".to_string(),
                 field_name: Some("nameID 6".to_string()),
-                actual: Some(json!(name.len())),
+                actual: Some(json!(name.chars().count())),
                 expected: Some(json!(postscript_name_length)),
                 message: message.clone(),
             });
@@ -113,8 +113,9 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
                     // Use typo if present, nameid=1 otherwise
                     let family_name = typo_family_names.get(key).unwrap_or(string);
                     let full_instance_name = format!("{family_name} {instance_name}");
-                    if full_instance_name.len() > instance_name_length {
-                        let chars_too_long_count = full_instance_name.len() - instance_name_length;
+                    if full_instance_name.chars().count() > instance_name_length {
+                        let chars_too_long_count =
+                            full_instance_name.chars().count() - instance_name_length;
                         let chars_too_long = chars_too_long_count.to_string();
                         let message = format!(
                             "Variable font instance name '{}' formed by space-separated concatenation of font family name (nameID {}) and instance subfamily nameID {} exceeds {} characterss ({} characters too long).\n\nThis has been found to cause shaping issues for some accented letters in Microsoft Word on Windows 10 and 11.",
@@ -128,7 +129,7 @@ fn family_and_style_max_length(t: &Testable, context: &Context) -> CheckFnResult
                         status.add_metadata(Metadata::TableProblem {
                             table_tag: "fvar".to_string(),
                             field_name: Some("instance name".to_string()),
-                            actual: Some(json!(full_instance_name.len())),
+                            actual: Some(json!(full_instance_name.chars().count())),
                             expected: Some(json!(instance_name_length)),
                             message: message.clone(),
                         });
@@ -149,10 +150,11 @@ mod tests {
     use fontspector_checkapi::{
         codetesting::{
             assert_messages_contain, assert_pass, assert_results_contain, run_check_with_config,
-            test_able,
+            set_name_entry, test_able,
         },
-        StatusCode, TestableType,
+        FileTypeConvert, StatusCode, TestableType, TTF,
     };
+    use skrifa::raw::{types::NameId, TableProvider};
     use std::collections::HashMap;
 
     #[test]
@@ -208,6 +210,105 @@ mod tests {
             conf,
         );
         assert_messages_contain(&results, "(6 characters too long)");
+        assert_results_contain(
+            &results,
+            StatusCode::Fail,
+            Some("instance-too-long".to_string()),
+        );
+    }
+
+    /// Cabin VF is known to fit within the default limits.
+    #[test]
+    fn test_family_and_style_max_length_pass_cabin() {
+        let testable = test_able("cabinvf/Cabin[wdth,wght].ttf");
+        let results = run_check_with_config(
+            super::family_and_style_max_length,
+            TestableType::Single(&testable),
+            HashMap::new(),
+        );
+        assert_pass(&results);
+    }
+
+    /// A 33-character full font name exceeds the default limit of 32.
+    #[test]
+    fn test_family_and_style_max_length_fail_long_full_name() {
+        let mut testable = test_able("cabinvf/Cabin[wdth,wght].ttf");
+        // "An Absurdly Long Family Name Font" has 33 characters
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            NameId::FULL_NAME,
+            "An Absurdly Long Family Name Font".to_string(),
+        );
+        let results = run_check_with_config(
+            super::family_and_style_max_length,
+            TestableType::Single(&testable),
+            HashMap::new(),
+        );
+        assert_results_contain(
+            &results,
+            StatusCode::Fail,
+            Some("nameid4-too-long".to_string()),
+        );
+    }
+
+    /// A 28-character PostScript name exceeds the default limit of 27.
+    #[test]
+    fn test_family_and_style_max_length_warn_long_postscript_name() {
+        let mut testable = test_able("cabinvf/Cabin[wdth,wght].ttf");
+        // "AbsurdlyLongFontName-Regular" has 28 characters
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            NameId::POSTSCRIPT_NAME,
+            "AbsurdlyLongFontName-Regular".to_string(),
+        );
+        let results = run_check_with_config(
+            super::family_and_style_max_length,
+            TestableType::Single(&testable),
+            HashMap::new(),
+        );
+        assert_results_contain(
+            &results,
+            StatusCode::Warn,
+            Some("nameid6-too-long".to_string()),
+        );
+    }
+
+    /// A long fvar instance name combined with the family name exceeds 32
+    /// characters ("Cabin" + " " + 28 characters).
+    #[test]
+    fn test_family_and_style_max_length_fail_long_instance_name() {
+        let mut testable = test_able("cabinvf/Cabin[wdth,wght].ttf");
+        let f = TTF.from_testable(&testable).unwrap();
+        let instance_name_id = f
+            .font()
+            .fvar()
+            .unwrap()
+            .instances()
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .subfamily_name_id;
+        drop(f);
+        // "WithAVeryLongAndBadStyleName" has 28 characters
+        set_name_entry(
+            &mut testable,
+            3,
+            1,
+            0x0409,
+            instance_name_id,
+            "WithAVeryLongAndBadStyleName".to_string(),
+        );
+        let results = run_check_with_config(
+            super::family_and_style_max_length,
+            TestableType::Single(&testable),
+            HashMap::new(),
+        );
         assert_results_contain(
             &results,
             StatusCode::Fail,

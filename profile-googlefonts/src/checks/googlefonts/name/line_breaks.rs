@@ -1,5 +1,5 @@
-use fontations::skrifa::raw::TableProvider;
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
+use skrifa::raw::TableProvider;
 
 #[check(
     id = "googlefonts/name/line_breaks",
@@ -16,7 +16,8 @@ use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert};
     
     ",
     proposal = "https://github.com/fonttools/fontbakery/issues/4829",
-    title = "Name table entries should not contain line-breaks."
+    title = "Name table entries should not contain line-breaks.",
+    fix_source = sourcefix_line_breaks
 )]
 fn line_breaks(t: &Testable, _context: &Context) -> CheckFnResult {
     let f = testfont!(t);
@@ -38,15 +39,31 @@ fn line_breaks(t: &Testable, _context: &Context) -> CheckFnResult {
     return_result(problems)
 }
 
+#[cfg(feature = "sourcefix")]
+fn sourcefix_line_breaks(
+    source: &mut fontspector_checkapi::source::SourceFile,
+    _problems: &[Status],
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    for (name_id, name) in source.source.names.iter_mut() {
+        for (_lang_id, entry) in name.0.iter_mut() {
+            if entry.chars().any(|c| c == '\n') {
+                *entry = entry.replace('\n', " ");
+                log::info!("Replaced line-break in name entry {}.", name_id);
+            }
+        }
+    }
+    Ok(FixResult::Fixed)
+}
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-    use fontations::skrifa::raw::types::NameId;
     use fontspector_checkapi::{
         codetesting::{assert_pass, assert_results_contain, run_check, set_name_entry, test_able},
         StatusCode,
     };
+    use skrifa::raw::types::NameId;
 
     use super::line_breaks;
 

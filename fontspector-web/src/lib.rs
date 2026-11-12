@@ -18,6 +18,7 @@ use profile_fontwerk::Fontwerk;
 use profile_googlefonts::GoogleFonts;
 use profile_iso15008::Iso15008;
 use profile_microsoft::Microsoft;
+use profile_monotype::Monotype;
 use profile_opentype::OpenType;
 use profile_universal::Universal;
 use std::io::Write;
@@ -57,6 +58,9 @@ fn register_profiles<'a>() -> Registry<'a> {
     Fontwerk
         .register(&mut registry)
         .expect("Couldn't register Fontwerk profile, fontspector bug");
+    Monotype
+        .register(&mut registry)
+        .expect("Couldn't register Monotype profile, fontspector bug");
 
     {
         let (name, toml) = ("fontbureau", include_str!("../../profiles/fontbureau.toml"));
@@ -243,7 +247,7 @@ pub fn fix_fonts(fonts: &JsValue, requests: &JsValue) -> Result<Uint8Array, JsVa
     // avoid mutably borrowing the same testable multiple times.
     let mut to_fix: BTreeMap<String, (&mut Testable, Vec<FixRequest<'_>>)> = BTreeMap::new();
     let mut filenames_we_need = BTreeSet::new();
-    for request in js_sys::try_iter(requests)?.ok_or_else(|| "not iterable!")? {
+    for request in js_sys::try_iter(requests)?.ok_or("not iterable!")? {
         let request = request?;
         let filename = Reflect::get(&request, &JsValue::from_str("filename"))?
             .as_string()
@@ -260,7 +264,7 @@ pub fn fix_fonts(fonts: &JsValue, requests: &JsValue) -> Result<Uint8Array, JsVa
         }
     }
     // Next pass gathers fix functions and dialogue options
-    for request in js_sys::try_iter(requests)?.ok_or_else(|| "not iterable!")? {
+    for request in js_sys::try_iter(requests)?.ok_or("not iterable!")? {
         let request = request?;
         let check_id = Reflect::get(&request, &JsValue::from_str("check_id"))?
             .as_string()

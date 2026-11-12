@@ -1,6 +1,7 @@
-use fontations::{skrifa::raw::TableProvider, write::from_obj::ToOwnedTable};
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
 use serde_json::json;
+use skrifa::raw::TableProvider;
+use write_fonts::from_obj::ToOwnedTable;
 
 #[check(
     id = "linegaps",
@@ -20,6 +21,7 @@ use serde_json::json;
     proposal = "https://googlefonts.github.io/gf-guide/metrics.html",
     title = "Checking Vertical Metric linegaps.",
     hotfix = fix_linegaps,
+    fix_source = sourcefix_linegaps,
 )]
 fn linegaps(t: &Testable, _context: &Context) -> CheckFnResult {
     let f = testfont!(t);
@@ -67,8 +69,8 @@ fn fix_linegaps(
     _replies: Option<MoreInfoReplies>,
 ) -> Result<FixResult, FontspectorError> {
     let f = testfont!(t);
-    let mut os2: fontations::write::tables::os2::Os2 = f.font().os2()?.to_owned_table();
-    let mut hhea: fontations::write::tables::hhea::Hhea = f.font().hhea()?.to_owned_table();
+    let mut os2: write_fonts::tables::os2::Os2 = f.font().os2()?.to_owned_table();
+    let mut hhea: write_fonts::tables::hhea::Hhea = f.font().hhea()?.to_owned_table();
     os2.s_typo_line_gap = 0;
     hhea.line_gap = 0.into();
     // Rebuild with both tables
@@ -76,6 +78,24 @@ fn fix_linegaps(
     t.set(font_bytes);
     let f = testfont!(t);
     t.set(f.rebuild_with_new_table(&hhea)?);
+    Ok(FixResult::Fixed)
+}
+
+#[cfg(feature = "sourcefix")]
+fn sourcefix_linegaps(
+    s: &mut fontspector_checkapi::source::SourceFile,
+    _problems: &[Status],
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let font = &mut s.source;
+    for master in font.masters.iter_mut() {
+        if let Some(linegap) = master.metrics.get_mut(&babelfont::MetricType::HheaLineGap) {
+            *linegap = 0;
+        }
+        if let Some(os2_linegap) = master.metrics.get_mut(&babelfont::MetricType::TypoLineGap) {
+            *os2_linegap = 0;
+        }
+    }
     Ok(FixResult::Fixed)
 }
 

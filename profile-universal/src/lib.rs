@@ -41,18 +41,22 @@ impl fontspector_checkapi::ProfileProvider for Universal {
             );
 
         #[cfg(not(target_family = "wasm"))]
-        let builder = builder
-            .add_and_register_check(checks::fontdata_namecheck)
-            .add_and_register_check(checks::freetype_rasterizer);
+        let builder = builder.add_and_register_check(checks::fontdata_namecheck);
+        #[cfg(all(feature = "check", not(target_family = "wasm")))]
+        let builder = builder.add_and_register_check(checks::freetype_rasterizer);
 
-        builder
+        let builder = builder
             .add_and_register_check(checks::fvar_instance_ps_names)
             .add_and_register_check(checks::fvar_name_entries)
             .add_and_register_check(checks::gpos7)
             .add_and_register_check(checks::gpos_kerning_info)
             .add_and_register_check(checks::hinting_impact)
-            .add_and_register_check(checks::integer_ppem_if_hinted)
-            .add_and_register_check(checks::interpolation_issues)
+            .add_and_register_check(checks::integer_ppem_if_hinted);
+
+        #[cfg(feature = "check")]
+        let builder = builder.add_and_register_check(checks::interpolation_issues);
+
+        builder
             .add_and_register_check(checks::legacy_accents)
             .add_and_register_check(checks::ligature_carets)
             .add_and_register_check(checks::linegaps)
@@ -65,6 +69,7 @@ impl fontspector_checkapi::ProfileProvider for Universal {
             .add_and_register_check(checks::name::no_copyright_on_description)
             .add_and_register_check(checks::name::italic_names)
             .add_and_register_check(checks::name::trailing_spaces)
+            .add_and_register_check(checks::name::repeating_characters)
             .add_and_register_check(checks::nested_components)
             .add_and_register_check(checks::no_mac_entries)
             .add_and_register_check(checks::os2_metrics_match_hhea)
@@ -102,6 +107,7 @@ impl fontspector_checkapi::ProfileProvider for Universal {
             .add_and_register_check(checks::has_unicodes)
             .add_and_register_check(checks::required_name_ids)
             .add_and_register_check(checks::suspicious_sidebearings)
+            .add_and_register_check(checks::overlaps_bit)
             .build("universal", cr)
 
         //  Checks which don't make sense any more

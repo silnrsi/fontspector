@@ -2,6 +2,10 @@
 name = "fontspector-profile-microsoft"
 version = "1.0.0"
 edition = "2021"
+description = "Fontspector checks for Microsoft font conformance"
+repository = "https://github.com/fonttools/fontspector"
+homepage = "https://fonttools.github.io/fontspector/"
+license = "Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,13 +17,22 @@ path = "src/main.rs"
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = [
     "kurbo",
+    "plugin",
 ], version = "1.0.0" }
-fontations = { workspace = true }
+skrifa = { workspace = true }
+write-fonts = { workspace = true }
 regex = { workspace = true }
 harfrust = { workspace = true }
 
-# For tnum shaping
-rustybuzz = "0.20.1"
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+# Plugin architecture
+pluginator = { workspace = true }
+
+[features]
+# The "check" feature enables dependencies only needed for checks, not fixes.
+default = ["check"]
+sourcefix = ["fontspector-checkapi/sourcefix"]
+check = []
 
 [lints]
 workspace = true

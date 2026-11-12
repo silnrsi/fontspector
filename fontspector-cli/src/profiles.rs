@@ -2,10 +2,12 @@ use fontspector_checkapi::{Profile, ProfileProvider, Registry};
 use profile_fontwerk::Fontwerk;
 use profile_googlefonts::GoogleFonts;
 use profile_iso15008::Iso15008;
+use profile_microsoft::Microsoft;
+use profile_monotype::Monotype;
 use profile_opentype::OpenType;
+use profile_silfonts::SILfonts;
 use profile_universal::Universal;
 use profile_adobe::Adobe;
-use profile_microsoft::Microsoft;
 use std::{io::Read, path::PathBuf};
 
 use crate::args::Args;
@@ -70,14 +72,6 @@ pub(crate) fn register_core_profiles(args: &Args, registry: &mut Registry<'stati
     Fontwerk
         .register(registry)
         .expect("Couldn't register fontwerk profile, fontspector bug");
-
-    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
-    Microsoft
-        .register(registry)
-        .expect("Couldn't register microsoft profile, fontspector bug");
-
-    #[allow(clippy::expect_used)] // If this fails, I *want* to panic
-    Adobe
-        .register(registry)
-        .expect("Couldn't register adobefonts profile, fontspector bug");
+==== BASE ====
+==== BASE ====
 }

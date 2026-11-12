@@ -100,6 +100,7 @@ pub struct CheckMetadata {
     /// Whether or not a hotfix is available for this check
     pub hotfix_available: bool,
     /// Whether or not a source fix is available for this check
+    #[cfg(feature = "sourcefix")]
     pub sourcefix_available: bool,
 }
 
@@ -114,6 +115,7 @@ impl From<Check<'_>> for CheckMetadata {
             runs_on_collection: check.runs_on_collection(),
             metadata: check.metadata(),
             hotfix_available: check.hotfix.is_some(),
+            #[cfg(feature = "sourcefix")]
             sourcefix_available: check.fix_source.is_some(),
         }
     }
@@ -143,25 +145,25 @@ fn run_single_check(
         .get(check_id)
         .ok_or_else(|| format!("Unknown check id: {check_id}"))?;
 
-    if check.runs_on_collection() {
-        let filenames: Vec<PathBuf> = files.iter().map(PathBuf::from).collect();
-        let collection = TestableCollection::from_filenames(&filenames, None)
-            .map_err(|e| format!("Could not build testable collection: {e}"))?;
-        let testable = TestableType::Collection(&collection);
-        check
-            .run(&testable, &default_context(check), Some("test"))
-            .ok_or_else(|| "Check did not run for this collection".to_string())
-    } else {
-        if files.len() != 1 {
-            return Err("Single-file checks expect exactly one file argument".to_string());
+    match (check.runs_on_collection(), files) {
+        (true, files) => {
+            let filenames: Vec<PathBuf> = files.iter().map(PathBuf::from).collect();
+            let collection = TestableCollection::from_filenames(&filenames, None)
+                .map_err(|e| format!("Could not build testable collection: {e}"))?;
+            let testable = TestableType::Collection(&collection);
+            check
+                .run(&testable, &default_context(check), Some("test"))
+                .ok_or_else(|| "Check did not run for this collection".to_string())
         }
-        #[allow(clippy::indexing_slicing)] // We just checked that files has exactly one element
-        let testable =
-            Testable::new(&files[0]).map_err(|e| format!("Could not open testable file: {e}"))?;
-        let testable = TestableType::Single(&testable);
-        check
-            .run(&testable, &default_context(check), Some("test"))
-            .ok_or_else(|| "Check did not run for this file".to_string())
+        (false, [file]) => {
+            let testable =
+                Testable::new(file).map_err(|e| format!("Could not open testable file: {e}"))?;
+            let testable = TestableType::Single(&testable);
+            check
+                .run(&testable, &default_context(check), Some("test"))
+                .ok_or_else(|| "Check did not run for this file".to_string())
+        }
+        (false, _) => Err("Single-file checks expect exactly one file argument".to_string()),
     }
 }
 
@@ -181,11 +183,6 @@ fn build_metadata(
         metadata = metadata.register_filetype(name, filetype.pattern);
     }
     Ok(metadata)
-}
-
-/// Are we a fontspector plugin?
-pub(crate) fn current_executable_is_plugin() -> bool {
-    std::env::var("FONTSPECTOR_PLUGIN").is_ok()
 }
 
 /// The main entry point for a plugin, which sets up the registry and runs the appropriate check based on the command line arguments
@@ -509,6 +506,7 @@ pub fn load_external_plugin(
             ),
             implementation: check_impl,
             hotfix: None,
+            #[cfg(feature = "sourcefix")]
             fix_source: None,
             applies_to: Box::leak(Box::new(check_meta.applies_to.clone())),
             flags: CheckFlags::default(),

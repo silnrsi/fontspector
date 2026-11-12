@@ -1,9 +1,7 @@
-use fontations::{
-    read::{tables::os2::SelectionFlags, TableProvider},
-    write::from_obj::ToOwnedTable,
-};
 use fontspector_checkapi::{prelude::*, skip, testfont, FileTypeConvert, Metadata};
 use serde_json::json;
+use skrifa::raw::{tables::os2::SelectionFlags, TableProvider};
+use write_fonts::from_obj::ToOwnedTable;
 
 #[check(
     id = "googlefonts/use_typo_metrics",
@@ -29,6 +27,7 @@ use serde_json::json;
     proposal = "https://github.com/fonttools/fontbakery/issues/3241",
     title = "OS/2.fsSelection bit 7 (USE_TYPO_METRICS) is set in all fonts.",
     hotfix = fix_use_typo_metrics,
+    fix_source = sourcefix_use_typo_metrics,
 )]
 fn use_typo_metrics(t: &Testable, context: &Context) -> CheckFnResult {
     let f = testfont!(t);
@@ -61,31 +60,51 @@ fn fix_use_typo_metrics(
     if f.is_cjk_font(None) {
         return Ok(FixResult::Unfixable);
     }
-    let mut os2: fontations::write::tables::os2::Os2 = f.font().os2()?.to_owned_table();
+    let mut os2: write_fonts::tables::os2::Os2 = f.font().os2()?.to_owned_table();
     os2.fs_selection |= SelectionFlags::USE_TYPO_METRICS;
     t.set(f.rebuild_with_new_table(&os2)?);
     Ok(FixResult::Fixed)
+}
+
+#[cfg(feature = "sourcefix")]
+fn sourcefix_use_typo_metrics(
+    s: &mut fontspector_checkapi::source::SourceFile,
+    _problems: &[Status],
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    if let Some(selection) = s.source.custom_ot_values.os2_fs_selection {
+        if selection & (1 << 7) == 0 {
+            s.source.custom_ot_values.os2_fs_selection = Some(selection | (1 << 7));
+            Ok(FixResult::Fixed)
+        } else {
+            Ok(FixResult::NotBroken)
+        }
+    } else {
+        s.source.custom_ot_values.os2_fs_selection = Some(1 << 7);
+        Ok(FixResult::Fixed)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-    use fontations::skrifa::raw::TableProvider;
     use fontspector_checkapi::{
         codetesting::{assert_pass, assert_results_contain, assert_skip, run_check, test_able},
         FileTypeConvert, StatusCode,
     };
+    use skrifa::raw::TableProvider;
 
     use super::use_typo_metrics;
 
     fn set_fs_selection(testable: &mut fontspector_checkapi::Testable, value: u16) {
-        use fontations::{read::tables::os2::SelectionFlags, write::from_obj::ToOwnedTable};
+        use skrifa::raw::{tables::os2::SelectionFlags, TableProvider};
+        use write_fonts::from_obj::ToOwnedTable;
 
         let f = fontspector_checkapi::prelude::TTF
             .from_testable(testable)
             .unwrap();
-        let mut os2: fontations::write::tables::os2::Os2 = f.font().os2().unwrap().to_owned_table();
+        let mut os2: write_fonts::tables::os2::Os2 = f.font().os2().unwrap().to_owned_table();
         os2.fs_selection = SelectionFlags::from_bits_truncate(value);
         testable.set(f.rebuild_with_new_table(&os2).unwrap());
     }

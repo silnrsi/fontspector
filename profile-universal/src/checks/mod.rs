@@ -24,8 +24,9 @@ mod field_values;
 mod file_size;
 #[cfg(not(target_family = "wasm"))]
 mod fontdata_namecheck;
-#[cfg(not(target_family = "wasm"))]
+#[cfg(all(feature = "check", not(target_family = "wasm")))]
 mod freetype_rasterizer;
+mod fvar_STAT_axes;
 mod fvar_instance_ps_names;
 mod fvar_name_entries;
 mod gpos7;
@@ -35,6 +36,7 @@ mod has_glyphs;
 mod has_unicodes;
 mod hinting_impact;
 mod integer_ppem_if_hinted;
+#[cfg(feature = "check")]
 mod interpolation_issues;
 mod legacy_accents;
 mod ligature_carets;
@@ -47,6 +49,7 @@ mod nested_components;
 mod no_mac_entries;
 mod no_vert_and_vrt2;
 mod os2_metrics_match_hhea;
+mod overlaps_bit;
 mod required_name_ids;
 mod required_tables;
 mod rupee;
@@ -99,8 +102,9 @@ pub use field_values::field_values;
 pub use file_size::file_size;
 #[cfg(not(target_family = "wasm"))]
 pub use fontdata_namecheck::fontdata_namecheck;
-#[cfg(not(target_family = "wasm"))]
+#[cfg(all(feature = "check", not(target_family = "wasm")))]
 pub use freetype_rasterizer::freetype_rasterizer;
+pub use fvar_STAT_axes::fvar_stat_axes;
 pub use fvar_instance_ps_names::fvar_instance_ps_names;
 pub use fvar_name_entries::fvar_name_entries;
 pub use gpos7::gpos7;
@@ -110,6 +114,7 @@ pub use has_glyphs::has_glyphs;
 pub use has_unicodes::has_unicodes;
 pub use hinting_impact::hinting_impact;
 pub use integer_ppem_if_hinted::integer_ppem_if_hinted;
+#[cfg(feature = "check")]
 pub use interpolation_issues::interpolation_issues;
 pub use legacy_accents::legacy_accents;
 pub use ligature_carets::ligature_carets;
@@ -122,6 +127,7 @@ pub use nested_components::nested_components;
 pub use no_mac_entries::no_mac_entries;
 pub use no_vert_and_vrt2::no_vert_and_vrt2;
 pub use os2_metrics_match_hhea::os2_metrics_match_hhea;
+pub use overlaps_bit::overlaps_bit;
 pub use required_name_ids::required_name_ids;
 pub use required_tables::required_tables;
 pub use rupee::rupee;

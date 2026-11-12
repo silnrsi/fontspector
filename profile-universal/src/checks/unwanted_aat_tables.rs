@@ -1,6 +1,6 @@
-use fontations::write::FontBuilder;
 use fontspector_checkapi::{prelude::*, testfont, FileTypeConvert, Metadata};
 use serde_json::json;
+use write_fonts::FontBuilder;
 
 const UNWANTED_TABLES: [&[u8; 4]; 23] = [
     b"acnt", b"ankr", b"bdat", b"bhed", b"bloc", b"bmap", b"bsln", b"EBSC", b"fdsc", b"feat",
@@ -56,6 +56,25 @@ fn unwanted_aat_tables(t: &Testable, _context: &Context) -> CheckFnResult {
     return_result(problems)
 }
 
+fn delete_unwanted_aat_tables(
+    t: &mut Testable,
+    _replies: Option<MoreInfoReplies>,
+) -> Result<FixResult, FontspectorError> {
+    let f = testfont!(t);
+    let mut new_font = FontBuilder::new();
+    for table in f.font().table_directory.table_records() {
+        let tag = table.tag.get();
+        if !UNWANTED_TABLES.contains(&&tag.into_bytes()) {
+            if let Some(table) = f.font().table_data(tag) {
+                new_font.add_raw(tag, table);
+            }
+        }
+    }
+    let new_bytes = new_font.build();
+    t.set(new_bytes);
+    Ok(FixResult::Fixed)
+}
+
 #[cfg(test)]
 mod tests {
     use fontspector_checkapi::{
@@ -90,23 +109,4 @@ mod tests {
             );
         }
     }
-}
-
-fn delete_unwanted_aat_tables(
-    t: &mut Testable,
-    _replies: Option<MoreInfoReplies>,
-) -> Result<FixResult, FontspectorError> {
-    let f = testfont!(t);
-    let mut new_font = FontBuilder::new();
-    for table in f.font().table_directory.table_records() {
-        let tag = table.tag.get();
-        if !UNWANTED_TABLES.contains(&&tag.into_bytes()) {
-            if let Some(table) = f.font().table_data(tag) {
-                new_font.add_raw(tag, table);
-            }
-        }
-    }
-    let new_bytes = new_font.build();
-    t.set(new_bytes);
-    Ok(FixResult::Fixed)
 }
