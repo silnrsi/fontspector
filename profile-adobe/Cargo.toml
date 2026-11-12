@@ -13,6 +13,7 @@ path = "src/main.rs"
 [dependencies]
 fontspector-checkapi = { path = "../fontspector-checkapi", features = [
     "kurbo",
+    "sourcefix",
     "plugin",
 ] }
 skrifa = { workspace = true }
